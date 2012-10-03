@@ -1,0 +1,6 @@
+MIDlet-Name: TTM4160SunSPOTApplication
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: ITEM, NTNU
+MIDlet-1: TTM4160 Sun SPOT Application, , no.ntnu.item.ttm4160.sunspot.SunSpotApplication
+MicroEdition-Profile: IMP-1.0
+MicroEdition-Configuration: CLDC-1.1

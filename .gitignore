@@ -2,3 +2,6 @@
 *\.classpath
 */bin/
 */.settings/
+*/build
+*/j2meclasses
+*/suite

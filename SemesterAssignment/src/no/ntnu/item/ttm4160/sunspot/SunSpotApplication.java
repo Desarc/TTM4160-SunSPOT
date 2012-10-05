@@ -27,6 +27,8 @@ package no.ntnu.item.ttm4160.sunspot;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
+import no.ntnu.item.ttm4160.sunspot.communication.Communications;
+import no.ntnu.item.ttm4160.sunspot.communication.ICommunicationLayerListener;
 import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 
 import com.sun.spot.peripheral.Spot;
@@ -46,6 +48,7 @@ import com.sun.spot.util.IEEEAddress;
 public class SunSpotApplication extends MIDlet {
 	
 	public Scheduler scheduler;
+	public Communications com;
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
 	
@@ -55,10 +58,9 @@ public class SunSpotApplication extends MIDlet {
         new BootloaderListener().start();   // monitor the USB (if connected) and recognize commands from host
         // So you don't have to reset SPOT to deploy new code on it.
 
-        /*
-         * Instantiate the scheduler and the state machines, then start the scheduler.
-         */
-        
+        scheduler = new Scheduler();
+        com = new Communications(new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex());
+        com.registerListener(scheduler.getListener());
         
     }
     

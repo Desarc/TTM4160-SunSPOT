@@ -19,6 +19,7 @@ public class ReceiveStateMachine extends StateMachine {
 	public void assignEvent(Event event) {
 		// TODO Auto-generated method stub
 		
+		
 	}
 
 }

@@ -17,6 +17,7 @@ public class Scheduler{
 	public Scheduler() {
 		listener = new ICommunicationLayerListener() {
 			public void inputReceived(Message msg) {
+				handleMessage(msg);
 				saveMessage(msg);
 			}
 		};
@@ -27,6 +28,9 @@ public class Scheduler{
 	
 	public ICommunicationLayerListener getListener() {
 		return this.listener;
+	}
+	
+	public void handleMessage(Message msg) {
 	}
 	
 	public void saveMessage (Message msg) {

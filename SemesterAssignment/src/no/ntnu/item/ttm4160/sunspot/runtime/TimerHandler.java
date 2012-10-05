@@ -20,18 +20,18 @@ public class TimerHandler {
 		
 	}
 	
-	public void startNewTimer(long time, Event event) {
+	public synchronized void startNewTimer(long time, Event event) {
 		SPOTTimer timer = new SPOTTimer(time, event, this);
 		activeTimers.addElement(timer);
 		timer.start();
 	}
 	
-	public void timeout(SPOTTimer timer) {
+	public synchronized void timeout(SPOTTimer timer) {
 		activeTimers.removeElement(timer);
 		timeoutEventQueue.put(timer.getEvent());
 	}
 	
-	public void killAllTimers() {
+	public synchronized void killAllTimers() {
 		for (int i = 0; i < activeTimers.size(); i++) {
 			Object element = activeTimers.elementAt(i);
 			((SPOTTimer) element).cancel();
@@ -40,9 +40,9 @@ public class TimerHandler {
 		timeoutEventQueue = new Queue();
 	}
 	
-	public Event checkTimeoutQueue() {
+	public synchronized Event checkTimeoutQueue() {
 		if (timeoutEventQueue.size() == 0) {
-			return new Event(0);
+			return new Event(Event.noEvent, stateMachineId);
 		}
 		else {
 			return (Event)timeoutEventQueue.get();

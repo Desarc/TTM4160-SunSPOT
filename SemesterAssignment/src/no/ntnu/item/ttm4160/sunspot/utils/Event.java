@@ -3,24 +3,40 @@ package no.ntnu.item.ttm4160.sunspot.utils;
 
 public class Event {
 
-	private String type;
+	private int type;
+	private String stateMachineId;
+	private String data;
 	
-	public static final String noEvent = null;
-	public static final String timeout = "Timeout";
+	public static final int noEvent = 0;
+	public static final int timeout = 1;
+	public static final int broadcast = 2;
+	public static final int transmitReadings = 3;
+	public static final int receiveReadings = 4;
 	
-	public Event(int code) {
-		if (code == 0) {
-			type = noEvent;
-		}
+	public Event(int type, String stateMachineId) {
+		this.type = type;
+		this.stateMachineId = stateMachineId;
+	}
+	
+	public Event(int type, String stateMachineId, String data) {
+		this(type, stateMachineId);
+		this.data = data;
 	}
 	
 	/**
-	 * If the type is null, there is no event.
+	 * If the type is zero, there is no event -> discard.
 	 * 
 	 * @return
 	 */
-	public String getType() {
-		return type;
-		
+	public int getType() {
+		return type;	
+	}
+	
+	public String getStateMachineId() {
+		return stateMachineId;
+	}
+	
+	public String getData() {
+		return data;
 	}
 }

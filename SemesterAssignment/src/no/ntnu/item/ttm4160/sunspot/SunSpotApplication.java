@@ -23,13 +23,16 @@
  */
 package no.ntnu.item.ttm4160.sunspot;
 
+
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 
 import com.sun.spot.peripheral.Spot;
-import com.sun.spot.sensorboard.peripheral.LightSensor;
+import com.sun.spot.sensorboard.EDemoBoard;
+import com.sun.spot.sensorboard.peripheral.ILightSensor;
+import com.sun.spot.sensorboard.peripheral.ITriColorLED;
 import com.sun.spot.util.BootloaderListener;
 import com.sun.spot.util.IEEEAddress;
 
@@ -42,7 +45,9 @@ import com.sun.spot.util.IEEEAddress;
  */
 public class SunSpotApplication extends MIDlet {
 	
-	Scheduler scheduler;
+	public Scheduler scheduler;
+	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
+    public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
 	
 	
     protected void startApp() throws MIDletStateChangeException {

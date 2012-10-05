@@ -51,6 +51,7 @@ public class SunSpotApplication extends MIDlet {
 	public Communications com;
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
+    public String MAC;
 	
 	
     protected void startApp() throws MIDletStateChangeException {
@@ -59,7 +60,8 @@ public class SunSpotApplication extends MIDlet {
         // So you don't have to reset SPOT to deploy new code on it.
 
         scheduler = new Scheduler();
-        com = new Communications(new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex());
+        MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
+        com = new Communications(MAC);
         com.registerListener(scheduler.getListener());
         
     }

@@ -7,7 +7,7 @@ import no.ntnu.item.ttm4160.sunspot.utils.SPOTTimer;
 
 import com.sun.spot.util.Queue;
 
-public class TimerHandler {
+public class TimerHandler extends Thread {
 	
 	private Queue timeoutEventQueue;
 	private Vector activeTimers;

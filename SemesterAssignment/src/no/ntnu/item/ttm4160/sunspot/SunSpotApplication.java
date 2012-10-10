@@ -63,6 +63,7 @@ public class SunSpotApplication extends MIDlet {
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
         com.registerListener(scheduler.getListener());
+        //com.registerListener(scheduler);
         
     }
     

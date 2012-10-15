@@ -7,7 +7,7 @@ import no.ntnu.item.ttm4160.sunspot.communication.*;
 import no.ntnu.item.ttm4160.sunspot.runtime.*;
 import no.ntnu.item.ttm4160.sunspot.utils.*;
 
-public class Scheduler{
+public class Scheduler implements ICommunicationLayerListener{
 	
 	ICommunicationLayerListener listener;
 	EventQueue eventQueue;
@@ -48,8 +48,17 @@ public class Scheduler{
 		}
 	}
 	
+	public Event generateEvent(Message msg ) {
+		return null;
+	}
+	
 	public void saveEvent(Event event, String MAC) {
 		eventQueue.saveEvent(event);
+		
+	}
+
+	public void inputReceived(Message msg) {
+		// TODO Auto-generated method stub
 		
 	}
 	

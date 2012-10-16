@@ -2,57 +2,48 @@ package no.ntnu.item.ttm4160.sunspot.runtime;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.*;
-import no.ntnu.item.ttm4160.sunspot.runtime.*;
 import no.ntnu.item.ttm4160.sunspot.utils.*;
 
-public class Scheduler extends Thread implements ICommunicationLayerListener{
-	
-	ICommunicationLayerListener listener;
+public class Scheduler implements ICommunicationLayerListener{
 	
 	private Hashtable activeStateMachines;
 	private SunSpotApplication app;
 	private Hashtable eventQueues;
 	private Hashtable timerHandlers;
 	private int state;
+	private int nOfConnections;
+	private int maxConnections = 5;
 	
 	public static final int idle = 0; //no events being processed by any state machine
 	public static final int busy = 0; //a state machine is processing an event
 	
+	
 	public Scheduler() {
 		state = idle;
-		listener = new ICommunicationLayerListener() {
-			public void inputReceived(Message msg) {
-//				handleMessage(msg);
-//				saveEvent(event, app.MAC);
-			}
-		};
 		eventQueues = new Hashtable();
 		timerHandlers = new Hashtable();
 		activeStateMachines = new Hashtable();
+		nOfConnections = 0;
 	}
 	
 	public Scheduler(SunSpotApplication app) {
 		this();
 		this.app = app;
 	}	
-	
-	public ICommunicationLayerListener getListener() {
-		return this.listener;
-	}
-	
+
 	public synchronized void handleMessage(Message message) {
-		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
+		if (message.getReceiver().equals(Message.BROADCAST_ADDRESS) && nOfConnections <= maxConnections) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), this, app);
+			nOfConnections++;
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId());
 			Event event = generateEvent(message);
 			eventQueue.addEvent(event);
 			eventQueues.put(eventQueue.getStateMachineId(), eventQueue);
-			
 		}
+		//else if ()
 		if (state == idle) {
 			getNextEvent();
 		}
@@ -74,8 +65,7 @@ public class Scheduler extends Thread implements ICommunicationLayerListener{
 	
 
 	public void inputReceived(Message message) {
-		// TODO Auto-generated method stub
-		
+		handleMessage(message);
 	}
 	
 	public synchronized void getNextEvent() {

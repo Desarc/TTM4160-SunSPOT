@@ -55,7 +55,7 @@ public class TimerHandler extends Thread {
 		return nextEvent.getTimeStamp();
 	}
 
-	public Event getNextEvent() {
+	public synchronized Event getNextEvent() {
 		Event next;
 		if (timeoutEventQueue.size() > 0) {
 			next = nextEvent;
@@ -66,5 +66,9 @@ public class TimerHandler extends Thread {
 			nextEvent = null;
 		}
 		return next;
+	}
+	
+	public String getStateMachineId() {
+		return stateMachineId;
 	}
 }

@@ -11,7 +11,7 @@ public class Event {
 	public static final int noEvent = 0;
 	public static final int timeout = 1;
 	public static final int broadcast = 2;
-	public static final int transmitReadings = 3;
+	public static final int sendReadings = 3;
 	public static final int receiveReadings = 4;
 	
 	public Event(int type, String stateMachineId, long timestamp) {

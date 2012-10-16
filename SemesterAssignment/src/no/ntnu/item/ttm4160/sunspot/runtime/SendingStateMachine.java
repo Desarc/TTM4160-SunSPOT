@@ -16,8 +16,26 @@ public class SendingStateMachine extends StateMachine {
 		this.state = idle;
 	}
 	
+	public void run() {
+		if (currentEvent.getType() == Event.broadcast) {
+			broadcast();
+		}
+		else if (currentEvent.getType() == Event.sendReadings) {
+			sendReadings();
+		}
+		else {
+			returnControlToScheduler();
+		}
+	}
+	
+	public void broadcast() {
+		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.CanYouDisplayMyReadings);
+		app.com.sendRemoteMessage(message);
+		returnControlToScheduler();
+	}
+	
 	public void sendReadings() {
-		Message message = new Message(app.MAC+":"+stateMachineId, Message.DATAGRAM_PORT, Message.CanYouDisplayMyReadings);
+		Message message = new Message(app.MAC+":"+stateMachineId, Message.DATAGRAM_PORT, Message.Reading+registerReadings());
 		app.com.sendRemoteMessage(message);
 		returnControlToScheduler();
 	}

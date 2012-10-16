@@ -76,7 +76,7 @@ public class SunSpotApplication extends MIDlet {
         
     }
     
-    public synchronized void showTemprature(int value) {
+    public synchronized void showLightreadings(int value) {
     	int intensity = (int)(2/175.0*value);
     	
 		/**

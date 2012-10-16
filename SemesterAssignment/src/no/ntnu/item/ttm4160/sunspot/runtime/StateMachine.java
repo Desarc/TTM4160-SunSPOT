@@ -56,4 +56,8 @@ public abstract class StateMachine extends Thread {
 		scheduler.getNextEvent();
 	}
 	
+	public String getId() {
+		return stateMachineId;
+	}
+	
 }

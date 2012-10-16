@@ -12,6 +12,7 @@ public class TimerHandler extends Thread {
 	private Queue timeoutEventQueue;
 	private Vector activeTimers;
 	private String stateMachineId;
+	private Event nextEvent;
 	
 	public TimerHandler(String stateMachineId) {
 		this.stateMachineId = stateMachineId;
@@ -28,7 +29,14 @@ public class TimerHandler extends Thread {
 	
 	public synchronized void timeout(SPOTTimer timer) {
 		activeTimers.removeElement(timer);
-		timeoutEventQueue.put(timer.getEvent());
+		Event timeout = timer.getEvent();
+		timeout.setTimeStamp(System.currentTimeMillis());
+		if (nextEvent == null) {
+			nextEvent = timeout;
+		}
+		else {
+			timeoutEventQueue.put(timeout);
+		}
 	}
 	
 	public synchronized void killAllTimers() {
@@ -40,15 +48,23 @@ public class TimerHandler extends Thread {
 		timeoutEventQueue = new Queue();
 	}
 	
-	public synchronized Event checkTimeoutQueue() {
-		if (timeoutEventQueue.size() == 0) {
-			return new Event(Event.noEvent, stateMachineId);
+	public synchronized long checkTimeoutQueue() {
+		if (nextEvent == null) {
+			return 0;
 		}
-		else {
-			return (Event)timeoutEventQueue.get();
-		}
-		
+		return nextEvent.getTimeStamp();
 	}
 
-	
+	public Event getNextEvent() {
+		Event next;
+		if (timeoutEventQueue.size() > 0) {
+			next = nextEvent;
+			nextEvent = (Event)timeoutEventQueue.get();
+		}
+		else {
+			next = nextEvent;
+			nextEvent = null;
+		}
+		return next;
+	}
 }

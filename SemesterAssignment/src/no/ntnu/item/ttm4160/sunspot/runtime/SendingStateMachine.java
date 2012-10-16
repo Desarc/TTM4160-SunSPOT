@@ -20,7 +20,7 @@ public class SendingStateMachine extends StateMachine {
 		if (currentEvent.getType() == Event.broadcast) {
 			broadcast();
 		}
-		else if (currentEvent.getType() == Event.receiveReadings) {
+		else if (currentEvent.getType() == Event.sendReadings) {
 			sendReadings();
 		}
 		else {

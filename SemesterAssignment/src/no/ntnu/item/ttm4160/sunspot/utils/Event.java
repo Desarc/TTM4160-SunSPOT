@@ -18,6 +18,7 @@ public class Event {
 	public static final int disconnect = 7;
 	public static final int receiverDisconnect = 7;
 	public static final int senderDisconnect = 8;
+	public static final int sendReadings = 9;
 	
 	public Event(int type, String stateMachineId, long timestamp) {
 		this.type = type;

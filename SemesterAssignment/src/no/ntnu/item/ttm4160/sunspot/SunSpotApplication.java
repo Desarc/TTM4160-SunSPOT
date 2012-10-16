@@ -24,6 +24,8 @@
 package no.ntnu.item.ttm4160.sunspot;
 
 
+import java.io.IOException;
+
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
@@ -35,8 +37,10 @@ import com.sun.spot.peripheral.Spot;
 import com.sun.spot.sensorboard.EDemoBoard;
 import com.sun.spot.sensorboard.peripheral.ILightSensor;
 import com.sun.spot.sensorboard.peripheral.ITriColorLED;
+import com.sun.spot.sensorboard.peripheral.LEDColor;
 import com.sun.spot.util.BootloaderListener;
 import com.sun.spot.util.IEEEAddress;
+import com.sun.spot.util.Utils;
 
 /*
  * The startApp method of this class is called by the VM to start the
@@ -67,10 +71,24 @@ public class SunSpotApplication extends MIDlet {
         
     }
     
-    
-    
-   
-    
+    public synchronized void showTemprature(int value) {
+    	int intensity = (int)(2/175.0*value);
+    	
+		/**
+	     * Den har verdier fra 0-730. Dette var et tips jeg fikk fra internett.
+	     * Man deler 2 på 175 og ganger med average, da får man en verdi fra 0-8.
+	     * Dette kan da representere intensiteten og skru på de tilhørende ledsene.
+	     */
+		for(int i = 0; i<intensity; i++) {
+			leds[i].setColor(LEDColor.RED);
+			leds[i].setOn();
+		}
+		for(int j=intensity; j<8; j++) {
+			leds[j].setColor(LEDColor.GREEN);
+			leds[j].setOn();
+		}
+		Utils.sleep(2000);
+    }
     
     
     protected void pauseApp() {

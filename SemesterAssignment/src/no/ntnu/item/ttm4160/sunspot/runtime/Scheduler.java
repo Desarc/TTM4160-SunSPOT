@@ -4,10 +4,11 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
+import no.ntnu.item.ttm4160.sunspot.SunSpotListener;
 import no.ntnu.item.ttm4160.sunspot.communication.*;
 import no.ntnu.item.ttm4160.sunspot.utils.*;
 
-public class Scheduler implements ICommunicationLayerListener{
+public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 	
 	private Hashtable activeStateMachines;
 	private SunSpotApplication app;
@@ -19,6 +20,7 @@ public class Scheduler implements ICommunicationLayerListener{
 	
 	public static final int idle = 0; //no events being processed by any state machine
 	public static final int busy = 0; //a state machine is processing an event
+	
 	
 	
 	public Scheduler() {
@@ -35,15 +37,56 @@ public class Scheduler implements ICommunicationLayerListener{
 	}	
 
 	public synchronized void handleMessage(Message message) {
+		Event event = generateEvent(message);
 		if (message.getReceiver().equals(Message.BROADCAST_ADDRESS) && nOfConnections <= maxConnections) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), this, app);
 			nOfConnections++;
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId());
-			Event event = generateEvent(message);
 			eventQueue.addEvent(event);
 			eventQueues.put(eventQueue.getStateMachineId(), eventQueue);
 		}
-		//else if ()
+		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
+			nOfConnections++;
+			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
+			queue.addEvent(event);
+		}
+		else if(message.getContent().equals(Message.Approved)) {
+			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
+			queue.addEvent(event);
+		}
+		else if(message.getContent().equals(Message.Denied)) {
+			nOfConnections--;
+			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
+			queue.addEvent(event);
+		}
+		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
+			nOfConnections--;
+			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
+			queue.addEvent(event);
+		}
+		else if(message.getContent().equals(Message.SenderDisconnect)) {
+			nOfConnections--;
+			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
+			queue.addEvent(event);
+		}
+		if (state == idle) {
+			getNextEvent();
+		}
+	}
+	
+	public synchronized void actionReceived(String action) {
+		if (action.equals(SunSpotApplication.button1)) {
+			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
+			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId());
+			Event event = generateEvent(action, sendingStateMachine.getId());
+			eventQueue.addEvent(event);
+			eventQueues.put(sendingStateMachine.getId(), eventQueue);
+			TimerHandler handler = new TimerHandler(sendingStateMachine.getId());
+			timerHandlers.put(sendingStateMachine.getId(), handler);
+		}
+		else if (action.equals(SunSpotApplication.button2)) {
+			
+		}
 		if (state == idle) {
 			getNextEvent();
 		}
@@ -51,7 +94,32 @@ public class Scheduler implements ICommunicationLayerListener{
 	
 	private Event generateEvent(Message message) {
 		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
-			return new Event(Event.broadcast, message.getSender(), message.getSenderMAC(), System.currentTimeMillis());
+			return new Event(Event.broadcast, message.getSender(), System.currentTimeMillis());
+		}
+		else if(message.getContent().equals(Message.ICanDisplayReadings)) {
+			return new Event(Event.broadcast_response, message.getReceiver(), message.getSender(), System.currentTimeMillis());
+		}
+		else if(message.getContent().equals(Message.Approved)) {
+			return new Event(Event.connectionApproved, message.getReceiver(), System.currentTimeMillis());
+		}
+		else if(message.getContent().equals(Message.Denied)) {
+			return new Event(Event.connectionDenied, message.getReceiver(), System.currentTimeMillis());
+		}
+		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
+			return new Event(Event.receiverDisconnect, message.getReceiver(), System.currentTimeMillis());
+		}
+		else if(message.getContent().equals(Message.SenderDisconnect)) {
+			return new Event(Event.senderDisconnect, message.getReceiver(), System.currentTimeMillis());
+		}
+		return new Event(0, "", System.currentTimeMillis());
+	}
+	
+	private Event generateEvent(String action, String stateMachineId) {
+		if (action.equals(SunSpotApplication.button1)) {
+			return new Event(Event.broadcast, stateMachineId, System.currentTimeMillis());
+		}
+		else if (action.equals(SunSpotApplication.button2)) {
+			return new Event(Event.disconnect, stateMachineId, System.currentTimeMillis());
 		}
 		return new Event(0, "", System.currentTimeMillis());
 	}
@@ -69,6 +137,7 @@ public class Scheduler implements ICommunicationLayerListener{
 	}
 	
 	public synchronized void getNextEvent() {
+		state = busy;
 		EventQueue currentQueue = null;
 		TimerHandler currentHandler = null;
 		Event currentEvent;
@@ -106,7 +175,10 @@ public class Scheduler implements ICommunicationLayerListener{
 			return;
 		}
 		//no events in any queue
+		state = idle;
 		return;
 	}
+
+	
 	
 }

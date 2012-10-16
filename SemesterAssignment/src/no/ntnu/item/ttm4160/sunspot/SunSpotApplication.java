@@ -25,6 +25,7 @@ package no.ntnu.item.ttm4160.sunspot;
 
 
 import java.io.IOException;
+import java.util.Vector;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
@@ -56,7 +57,10 @@ public class SunSpotApplication extends MIDlet {
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
     public String MAC;
+    Vector listeners;
 	
+    public static final String button1 = "button1";
+	public static final String button2 = "button2";
 	
     protected void startApp() throws MIDletStateChangeException {
     	
@@ -67,7 +71,8 @@ public class SunSpotApplication extends MIDlet {
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
         com.registerListener(scheduler);
-        //com.registerListener(scheduler);
+        listeners = new Vector();
+        listeners.addElement(scheduler);
         
     }
     

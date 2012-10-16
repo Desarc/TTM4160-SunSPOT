@@ -47,18 +47,24 @@ public class Scheduler extends Thread implements ICommunicationLayerListener{
 		return this.listener;
 	}
 	
-	public synchronized void handleMessage(Message msg) {
-		if(msg.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
-			eventQueue = new EventQueue(msg.getSenderMAC());
-			eventQueues.put(msg.getSenderMAC(), eventQueue);
+	public synchronized void handleMessage(Message message) {
+		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(this, app);
-			
-			receiveStateMachine.start();
+			EventQueue eventQueue = new EventQueue(message.getSender());
+			Event event = generateEvent(message);
+			eventQueue.addEvent(event);
+			eventQueues.put(eventQueue.getStateMachineId(), eventQueue);
+			if (state == idle) {
+				getNextEvent();
+			}
 		}
 	}
 	
-	private Event generateEvent(Message msg) {
-		return new Event(0, msg.getReceiver());
+	private Event generateEvent(Message message) {
+		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
+			return new Event(Event.broadcast, message.getReceiver(), message.getSenderMAC());
+		}
+		return new Event(0, "");
 	}
 	
 	public synchronized void saveEvent(Event event, String stateMachineId) {

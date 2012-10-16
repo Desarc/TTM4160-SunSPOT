@@ -9,11 +9,9 @@ public class BroadcastStateMachine extends StateMachine {
 	
 	public static final int idle = 0;
 	
-	public BroadcastStateMachine(Scheduler scheduler, SunSpotApplication app) {
-		this.stateMachineId = this.toString();
+	public BroadcastStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
+		super(stateMachineId, scheduler, app);
 		this.state = idle;
-		this.scheduler = scheduler;
-		this.app = app;
 	}
 	
 	public void run() {

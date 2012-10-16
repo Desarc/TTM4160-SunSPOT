@@ -7,11 +7,9 @@ public class ReceiveStateMachine extends StateMachine {
 	
 	public static final int idle = 0;
 	
-	public ReceiveStateMachine(Scheduler scheduler, SunSpotApplication app) {
-		this.stateMachineId = this.toString();
+	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
+		super(stateMachineId, scheduler, app);
 		this.state = idle;
-		this.scheduler = scheduler;
-		this.app = app;
 	}
 	
 	public void assignEvent(Event event) {

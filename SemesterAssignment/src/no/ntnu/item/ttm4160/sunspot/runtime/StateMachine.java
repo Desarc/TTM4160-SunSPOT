@@ -16,6 +16,11 @@ public abstract class StateMachine extends Thread {
 		
 	}
 	
+	public StateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
+		this.stateMachineId = stateMachineId;
+		this.scheduler = scheduler;
+		this.app = app;
+	}
 	
 	public void assignEvent(Event event) {
 		currentEvent = event;

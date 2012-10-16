@@ -25,18 +25,18 @@ package no.ntnu.item.ttm4160.sunspot;
 
 
 import java.io.IOException;
-import java.util.Vector;
 
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
-import no.ntnu.item.ttm4160.sunspot.communication.ICommunicationLayerListener;
 import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 
 import com.sun.spot.peripheral.Spot;
 import com.sun.spot.sensorboard.EDemoBoard;
 import com.sun.spot.sensorboard.peripheral.ILightSensor;
+import com.sun.spot.sensorboard.peripheral.ISwitch;
+import com.sun.spot.sensorboard.peripheral.ISwitchListener;
 import com.sun.spot.sensorboard.peripheral.ITriColorLED;
 import com.sun.spot.sensorboard.peripheral.LEDColor;
 import com.sun.spot.util.BootloaderListener;
@@ -50,14 +50,15 @@ import com.sun.spot.util.Utils;
  * The manifest specifies this class as MIDlet-1, which means it will
  * be selected for execution.
  */
-public class SunSpotApplication extends MIDlet {
+public class SunSpotApplication extends MIDlet implements ISwitchListener {
 	
 	public Scheduler scheduler;
 	public Communications com;
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
+    public ISwitch sw1, sw2;
     public String MAC;
-    Vector listeners;
+    SunSpotListener listener;
 	
     public static final String button1 = "button1";
 	public static final String button2 = "button2";
@@ -71,8 +72,11 @@ public class SunSpotApplication extends MIDlet {
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
         com.registerListener(scheduler);
-        listeners = new Vector();
-        listeners.addElement(scheduler);
+        listener = scheduler;
+        sw1 = EDemoBoard.getInstance().getSwitches()[0];  
+        sw2 = EDemoBoard.getInstance().getSwitches()[1];
+        sw1.addISwitchListener(this);
+        sw2.addISwitchListener(this);
         
     }
     
@@ -117,6 +121,21 @@ public class SunSpotApplication extends MIDlet {
     	
     	
     }
+
+	public void switchPressed(ISwitch sw) {
+		if (sw == sw1) {
+			listener.actionReceived(button1);
+		}
+		else {
+			listener.actionReceived(button2);
+		}
+		
+	}
+
+	public void switchReleased(ISwitch sw) {
+		// TODO Auto-generated method stub
+		
+	}
 
     
 }

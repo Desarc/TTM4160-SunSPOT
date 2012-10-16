@@ -38,7 +38,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 
 	public synchronized void handleMessage(Message message) {
 		Event event = generateEvent(message);
-		if (message.getReceiver().equals(Message.BROADCAST_ADDRESS) && nOfConnections <= maxConnections) {
+		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), this, app);
 			nOfConnections++;
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId());

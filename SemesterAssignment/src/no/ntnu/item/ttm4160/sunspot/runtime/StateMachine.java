@@ -9,19 +9,30 @@ public abstract class StateMachine extends Thread {
 	protected int state;
 	protected Scheduler scheduler;
 	protected SunSpotApplication app;
+	protected Event currentEvent;
 	
 	
 	class NotImplementedException extends Exception {
 		
 	}
 	
+	
+	public void assignEvent(Event event) {
+		currentEvent = event;
+		start(); //calls run()
+	}
+	
 	/**
 	 * Must always be implemented in any subclass!
 	 * 
-	 * @param event
 	 */
-	public void assignEvent(Event event) throws NotImplementedException {
-		throw new NotImplementedException();
+	public void run() {
+		try {
+			throw new NotImplementedException();
+		} catch (NotImplementedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -37,7 +48,7 @@ public abstract class StateMachine extends Thread {
 	 * 
 	 */
 	public void returnControlToScheduler() {
-		notify();
+		scheduler.getNextEvent();
 	}
 	
 }

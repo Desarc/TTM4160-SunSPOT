@@ -5,8 +5,6 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
 
 public class ReceiveStateMachine extends StateMachine {
 	
-	private Scheduler scheduler;
-	private SunSpotApplication app;
 	public static final int idle = 0;
 	
 	public ReceiveStateMachine(Scheduler scheduler, SunSpotApplication app) {

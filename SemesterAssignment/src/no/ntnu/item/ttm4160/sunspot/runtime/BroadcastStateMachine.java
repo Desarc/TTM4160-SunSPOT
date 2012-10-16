@@ -16,8 +16,8 @@ public class BroadcastStateMachine extends StateMachine {
 		this.app = app;
 	}
 	
-	public void assignEvent(Event event) {
-		if (event.getType() == Event.broadcast) {
+	public void run() {
+		if (currentEvent.getType() == Event.broadcast) {
 			broadcast();
 		}
 		else {
@@ -26,7 +26,7 @@ public class BroadcastStateMachine extends StateMachine {
 	}
 	
 	public void broadcast() {
-		Message message = new Message(scheduler.app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.button1Pressed);
+		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.button1Pressed);
 		app.com.sendRemoteMessage(message);
 		returnControlToScheduler();
 	}

@@ -12,9 +12,8 @@ public class ReceiveStateMachine extends StateMachine {
 		this.state = idle;
 	}
 	
-	public void assignEvent(Event event) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
+	
+	
+	
 }

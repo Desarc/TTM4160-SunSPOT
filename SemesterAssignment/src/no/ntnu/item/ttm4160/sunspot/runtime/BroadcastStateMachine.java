@@ -24,7 +24,7 @@ public class BroadcastStateMachine extends StateMachine {
 	}
 	
 	public void broadcast() {
-		Message message = new Message(Message.BROADCAST_ADDRESS+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.button1Pressed);
+		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.button1Pressed);
 		app.com.sendRemoteMessage(message);
 		returnControlToScheduler();
 	}

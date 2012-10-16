@@ -13,6 +13,20 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 	
 	
+	public void run() {
+		if (currentEvent.getType() == Event.receiveReadings) {
+			displayReadings();
+		}
+		else {
+			returnControlToScheduler();
+		}
+	}
+	
+	public void displayReadings() {
+		app.showLightreadings(Integer.parseInt(currentEvent.getData()));
+		returnControlToScheduler();
+	}
+	
 	
 	
 	

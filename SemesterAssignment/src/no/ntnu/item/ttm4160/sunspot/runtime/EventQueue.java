@@ -9,6 +9,8 @@ public class EventQueue {
 	private Queue eventQueue;
 	private Queue saveQueue;
 	private String stateMachineId;
+	private Event nextEvent;
+	private Event nextSaveEvent;
 	
 	public EventQueue(String stateMachineId) {
 		eventQueue = new Queue();
@@ -16,11 +18,21 @@ public class EventQueue {
 	}
 	
 	public void addEvent(Event event) {
-		eventQueue.put(event);
+		if (nextEvent == null) {
+			nextEvent = event;
+		}
+		else {
+			eventQueue.put(event);
+		}
 	}
 	
 	public void saveEvent(Event event) {
-		saveQueue.put(event);
+		if (nextSaveEvent == null) {
+			nextSaveEvent = event;
+		}
+		else {
+			saveQueue.put(event);
+		}
 	}
 	
 	/**
@@ -29,23 +41,44 @@ public class EventQueue {
 	 * @return
 	 */
 	public Event getNextEvent() {
-		if (saveQueue.size() != 0) {
-			return (Event)saveQueue.get();
+		Event next = null;
+		if (nextSaveEvent != null) {
+			next = nextSaveEvent;
+			if (saveQueue.size() != 0) {
+				nextSaveEvent = (Event)saveQueue.get();
+			}
+			else {
+				nextSaveEvent = null;
+			}
 		}
-		else if (eventQueue.size() != 0) {
-			return (Event)eventQueue.get();
+		else if (nextEvent != null) {
+			next = nextEvent;
+			if (eventQueue.size() != 0) {
+				nextEvent = (Event)eventQueue.get();
+			}
+			else {
+				nextEvent = null;
+			}
 		}
-		else {
-			return new Event(Event.noEvent, stateMachineId);
-		}
+		return next;
 	}
 	
 	public boolean isEmpty() {
-		return (eventQueue.size() == 0 && saveQueue.size() == 0);
+		return (nextEvent == null && nextSaveEvent == null && eventQueue.size() == 0 && saveQueue.size() == 0);
 	}
 	
 	public String getStateMachineId() {
 		return stateMachineId;
+	}
+	
+	public long checkTimeStamps() {
+		if (nextSaveEvent != null) {
+			return nextSaveEvent.getTimeStamp();
+		}
+		else if (nextEvent != null) {
+			return nextEvent.getTimeStamp();
+		}
+		return 0;
 	}
 	
 }

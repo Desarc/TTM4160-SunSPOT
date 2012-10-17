@@ -5,6 +5,10 @@ import com.sun.spot.sensorboard.peripheral.LEDColor;
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.utils.*;
 
+/**
+ * Simple state machine for testing the scheduler.
+ *
+ */
 public class TestStateMachine extends StateMachine {
 
 	int state;

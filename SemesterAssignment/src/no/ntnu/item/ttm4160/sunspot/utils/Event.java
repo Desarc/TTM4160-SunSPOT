@@ -1,6 +1,9 @@
 package no.ntnu.item.ttm4160.sunspot.utils;
 
-
+/**
+ * Event class, with a type, a timestamp, a reference to the state machine it belongs to, and optionally data.
+ *
+ */
 public class Event {
 
 	private int type;
@@ -8,6 +11,9 @@ public class Event {
 	private String data;
 	private long timestamp;
 	
+	/*
+	 * Event types:
+	 */
 	public static final int noEvent = 0;
 	public static final int sendReadings = 1;
 	public static final int broadcast = 2;

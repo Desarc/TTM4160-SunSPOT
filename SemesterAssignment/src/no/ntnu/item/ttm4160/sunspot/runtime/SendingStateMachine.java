@@ -6,6 +6,10 @@ import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.Message;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
 
+/**
+ * State machine for broadcasting and sending readings to another SunSPOT.
+ *
+ */
 public class SendingStateMachine extends StateMachine {
 
 	public static final int idle = 0;
@@ -15,6 +19,12 @@ public class SendingStateMachine extends StateMachine {
 		super(stateMachineId, scheduler, app);
 		this.state = idle;
 	}
+	
+	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, int priority) {
+		super(stateMachineId, scheduler, app, priority);
+		this.state = idle;
+	}
+	
 	
 	public void run() {
 		if (currentEvent.getType() == Event.broadcast) {

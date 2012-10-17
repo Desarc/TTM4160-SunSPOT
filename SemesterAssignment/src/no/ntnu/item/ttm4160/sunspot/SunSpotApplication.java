@@ -24,8 +24,6 @@
 package no.ntnu.item.ttm4160.sunspot;
 
 
-import java.io.IOException;
-
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
@@ -122,6 +120,9 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     	
     }
 
+    /**
+     * Listens for button actions, and notifies listeners.
+     */
 	public void switchPressed(ISwitch sw) {
 		leds[0].setColor(LEDColor.RED);
 		leds[0].setOn();		

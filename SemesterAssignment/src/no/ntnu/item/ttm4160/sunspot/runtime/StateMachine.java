@@ -1,6 +1,5 @@
 package no.ntnu.item.ttm4160.sunspot.runtime;
 
-import com.sun.spot.sensorboard.peripheral.LEDColor;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
@@ -25,10 +24,6 @@ public abstract class StateMachine extends Thread {
 	}
 	
 	public void assignEvent(Event event) {
-		for (int i = 0; i < app.leds.length; i++) {
-			app.leds[i].setColor(LEDColor.BLUE);
-			app.leds[i].setOn();
-		}
 		currentEvent = event;
 		run(); //calls run()
 	}

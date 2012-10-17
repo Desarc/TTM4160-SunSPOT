@@ -21,7 +21,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 	private int maxConnections = 5;
 	
 	public static final int idle = 0; //no events being processed by any state machine
-	public static final int busy = 0; //a state machine is processing an event
+	public static final int busy = 1; //a state machine is processing an event
 	
 	
 	
@@ -87,9 +87,10 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
 			eventQueue.addEvent(event);
 			eventQueues.put(test.getId(), eventQueue);
-			TimerHandler handler = new TimerHandler(test.getId());
+			TimerHandler handler = new TimerHandler(test.getId(), this);
 			timerHandlers.put(test.getId(), handler);
 //			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
+//			activeStateMachines.put(SendingStateMachine.getId(), SendingStateMachine);
 //			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId());
 //			Event event = generateEvent(action, sendingStateMachine.getId());
 //			eventQueue.addEvent(event);
@@ -145,7 +146,12 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		
 	}
 	
-	
+	public synchronized void timerNotify() {
+		if (state == busy) {
+			return;
+		}
+		getNextEvent();
+	}
 
 	public void inputReceived(Message message) {
 		handleMessage(message);
@@ -172,6 +178,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 			currentEvent = currentHandler.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
+			state = idle;
 			return;
 		}
 		
@@ -186,12 +193,10 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		}
 		if (nextTime < Long.MAX_VALUE) {
 			currentEvent = currentQueue.getNextEvent();
-			
-			System.out.println(activeStateMachines.isEmpty());
-			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
-			System.out.println(currentMachine.getId());
-			
+			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
+			System.out.println("Done!");
+			state = idle;
 			return;
 		}
 		//no events in any queue

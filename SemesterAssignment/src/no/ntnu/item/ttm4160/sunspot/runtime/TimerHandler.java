@@ -13,9 +13,11 @@ public class TimerHandler extends Thread {
 	private Vector activeTimers;
 	private String stateMachineId;
 	private Event nextEvent;
+	private Scheduler scheduler;
 	
-	public TimerHandler(String stateMachineId) {
+	public TimerHandler(String stateMachineId, Scheduler scheduler) {
 		this.stateMachineId = stateMachineId;
+		this.scheduler = scheduler;
 		activeTimers = new Vector();
 		timeoutEventQueue = new Queue();
 		
@@ -37,6 +39,7 @@ public class TimerHandler extends Thread {
 		else {
 			timeoutEventQueue.put(timeout);
 		}
+		scheduler.timerNotify();
 	}
 	
 	public synchronized void killAllTimers() {

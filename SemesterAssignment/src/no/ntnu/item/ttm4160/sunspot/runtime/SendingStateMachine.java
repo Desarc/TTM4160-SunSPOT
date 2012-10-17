@@ -34,20 +34,20 @@ public class SendingStateMachine extends StateMachine {
 			sendReadings();
 		}
 		else {
-			returnControlToScheduler();
+			returnControlToScheduler(false);
 		}
 	}
 	
 	public void broadcast() {
 		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.CanYouDisplayMyReadings);
 		app.com.sendRemoteMessage(message);
-		returnControlToScheduler();
+		returnControlToScheduler(false);
 	}
 	
 	public void sendReadings() {
 		Message message = new Message(app.MAC+":"+stateMachineId, Message.DATAGRAM_PORT, Message.Reading+registerReadings());
 		app.com.sendRemoteMessage(message);
-		returnControlToScheduler();
+		returnControlToScheduler(false);
 	}
 	
 	public String registerReadings() {

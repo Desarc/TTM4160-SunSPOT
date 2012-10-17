@@ -204,7 +204,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 	 * Each event assigned to a state machine spawns a new {@link Thread}, which is terminated once control is returned to the
 	 * scheduler.
 	 */
-	public synchronized void getNextEvent() {
+	private synchronized void getNextEvent() {
 		
 		state = busy;
 		EventQueue currentQueue = null;
@@ -261,6 +261,21 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		handler.startNewTimer(time, event);
 	}
 
-	
+	/**
+	 * Returns control to the scheduler, allowing another event to be processed. If terminate is set,
+	 * the scheduler terminates the {@link StateMachine} releasing control, in addition to its {@link EventQueue}
+	 * and {@link TimerHandler}.
+	 * @param terminate {@link boolean}
+	 * @param stateMachineId
+	 */
+	public synchronized void returnControl(boolean terminate, String stateMachineId) {
+		if (terminate) {
+			activeStateMachines.remove(stateMachineId);
+			((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
+			timerHandlers.remove(stateMachineId);
+			eventQueues.remove(stateMachineId);
+		}
+		getNextEvent();
+	}
 	
 }

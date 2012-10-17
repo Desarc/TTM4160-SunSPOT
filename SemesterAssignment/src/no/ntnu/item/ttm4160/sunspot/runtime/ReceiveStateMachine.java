@@ -27,13 +27,13 @@ public class ReceiveStateMachine extends StateMachine {
 			displayReadings();
 		}
 		else {
-			returnControlToScheduler();
+			returnControlToScheduler(false);
 		}
 	}
 	
 	public void displayReadings() {
 		app.showLightreadings(Integer.parseInt(currentEvent.getData()));
-		returnControlToScheduler();
+		returnControlToScheduler(false);
 	}
 	
 	

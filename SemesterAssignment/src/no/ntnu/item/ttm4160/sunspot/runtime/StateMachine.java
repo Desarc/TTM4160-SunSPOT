@@ -70,9 +70,10 @@ public abstract class StateMachine extends Thread {
 	/**
 	 * Returns control to scheduler, allowing another event to be processed.
 	 * 
+	 * @param terminate Tells the scheduler if this state machine should be terminated.
 	 */
-	public void returnControlToScheduler() {
-		scheduler.getNextEvent();
+	public void returnControlToScheduler(boolean terminate) {
+		scheduler.returnControl(terminate, stateMachineId);
 	}
 	
 	public String getId() {

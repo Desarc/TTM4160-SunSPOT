@@ -50,7 +50,7 @@ public class TimerHandler extends Thread {
 	
 	public synchronized long checkTimeoutQueue() {
 		if (nextEvent == null) {
-			return 0;
+			return Long.MAX_VALUE;
 		}
 		return nextEvent.getTimeStamp();
 	}

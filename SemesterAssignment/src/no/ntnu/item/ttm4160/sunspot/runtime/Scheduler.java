@@ -3,6 +3,8 @@ package no.ntnu.item.ttm4160.sunspot.runtime;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import com.sun.spot.sensorboard.peripheral.LEDColor;
+
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.SunSpotListener;
 import no.ntnu.item.ttm4160.sunspot.communication.*;
@@ -74,18 +76,31 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		}
 	}
 	
-	public synchronized void actionReceived(String action) {
+	String id;
+	public void actionReceived(String action) {
 		if (action.equals(SunSpotApplication.button1)) {
-			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
-			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId());
-			Event event = generateEvent(action, sendingStateMachine.getId());
+			
+			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), this, app);
+			activeStateMachines.put(test.getId(), test);
+			EventQueue eventQueue = new EventQueue(test.getId());
+			id = test.getId();
+			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
 			eventQueue.addEvent(event);
-			eventQueues.put(sendingStateMachine.getId(), eventQueue);
-			TimerHandler handler = new TimerHandler(sendingStateMachine.getId());
-			timerHandlers.put(sendingStateMachine.getId(), handler);
+			eventQueues.put(test.getId(), eventQueue);
+			TimerHandler handler = new TimerHandler(test.getId());
+			timerHandlers.put(test.getId(), handler);
+//			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
+//			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId());
+//			Event event = generateEvent(action, sendingStateMachine.getId());
+//			eventQueue.addEvent(event);
+//			eventQueues.put(sendingStateMachine.getId(), eventQueue);
+//			TimerHandler handler = new TimerHandler(sendingStateMachine.getId());
+//			timerHandlers.put(sendingStateMachine.getId(), handler);
 		}
 		else if (action.equals(SunSpotApplication.button2)) {
-			
+			Event event = new Event(Event.testOff, id, System.currentTimeMillis());
+			EventQueue eventQueue = (EventQueue)eventQueues.get(id);
+			eventQueue.addEvent(event);
 		}
 		if (state == idle) {
 			getNextEvent();
@@ -137,6 +152,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 	}
 	
 	public synchronized void getNextEvent() {
+		
 		state = busy;
 		EventQueue currentQueue = null;
 		TimerHandler currentHandler = null;
@@ -147,7 +163,7 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		for (Enumeration e = timerHandlers.keys(); e.hasMoreElements() ;) {
 			TimerHandler handler = (TimerHandler)timerHandlers.get(e.nextElement());
 			long time = handler.checkTimeoutQueue();
-			if (time != 0 && time < nextTime) {
+			if (time < nextTime) {
 				nextTime = time;
 				currentHandler = handler;
 			}
@@ -163,20 +179,29 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		for (Enumeration e = eventQueues.keys(); e.hasMoreElements() ;) {
 			EventQueue queue = (EventQueue)eventQueues.get(e.nextElement());
 			long time = queue.checkTimeStamps();
-			if (time != 0 && time < nextTime) {
+			if (time < nextTime) {
 				nextTime = time;
 				currentQueue = queue;
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
 			currentEvent = currentQueue.getNextEvent();
+			
+			System.out.println(activeStateMachines.isEmpty());
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
+			System.out.println(currentMachine.getId());
+			
 			currentMachine.assignEvent(currentEvent);
 			return;
 		}
 		//no events in any queue
 		state = idle;
 		return;
+	}
+	
+	public synchronized void addTimer(String stateMachineId, Event event, long time) {
+		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
+		handler.startNewTimer(time, event);
 	}
 
 	

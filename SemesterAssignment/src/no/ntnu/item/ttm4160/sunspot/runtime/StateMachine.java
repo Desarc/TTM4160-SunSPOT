@@ -1,5 +1,7 @@
 package no.ntnu.item.ttm4160.sunspot.runtime;
 
+import com.sun.spot.sensorboard.peripheral.LEDColor;
+
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
 
@@ -23,22 +25,19 @@ public abstract class StateMachine extends Thread {
 	}
 	
 	public void assignEvent(Event event) {
+		for (int i = 0; i < app.leds.length; i++) {
+			app.leds[i].setColor(LEDColor.BLUE);
+			app.leds[i].setOn();
+		}
 		currentEvent = event;
-		start(); //calls run()
+		run(); //calls run()
 	}
 	
 	/**
 	 * Must always be implemented in any subclass!
 	 * 
 	 */
-	public void run() {
-		try {
-			throw new NotImplementedException();
-		} catch (NotImplementedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	public abstract void run();
 	
 	/**
 	 * Tells scheduler to save an event.

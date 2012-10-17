@@ -78,7 +78,7 @@ public class EventQueue {
 		else if (nextEvent != null) {
 			return nextEvent.getTimeStamp();
 		}
-		return 0;
+		return Long.MAX_VALUE;
 	}
 	
 }

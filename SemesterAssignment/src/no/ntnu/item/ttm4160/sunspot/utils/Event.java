@@ -9,7 +9,7 @@ public class Event {
 	private long timestamp;
 	
 	public static final int noEvent = 0;
-	public static final int timeout = 1;
+	public static final int sendReadings = 1;
 	public static final int broadcast = 2;
 	public static final int broadcast_response = 3;
 	public static final int receiveReadings = 4;
@@ -18,7 +18,10 @@ public class Event {
 	public static final int disconnect = 7;
 	public static final int receiverDisconnect = 7;
 	public static final int senderDisconnect = 8;
-	public static final int sendReadings = 9;
+	
+	
+	public static final int testOn = 10;
+	public static final int testOff = 11;
 	
 	public Event(int type, String stateMachineId, long timestamp) {
 		this.type = type;

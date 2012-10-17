@@ -58,7 +58,7 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
     public ISwitch sw1, sw2;
     public String MAC;
-    SunSpotListener listener;
+    public SunSpotListener listener;
 	
     public static final String button1 = "button1";
 	public static final String button2 = "button2";
@@ -68,7 +68,7 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
         new BootloaderListener().start();   // monitor the USB (if connected) and recognize commands from host
         // So you don't have to reset SPOT to deploy new code on it.
 
-        scheduler = new Scheduler();
+        scheduler = new Scheduler(this);
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
         com.registerListener(scheduler);
@@ -123,6 +123,8 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     }
 
 	public void switchPressed(ISwitch sw) {
+		leds[0].setColor(LEDColor.RED);
+		leds[0].setOn();		
 		if (sw == sw1) {
 			listener.actionReceived(button1);
 		}

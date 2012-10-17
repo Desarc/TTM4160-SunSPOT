@@ -48,6 +48,7 @@ public class SendingStateMachine extends StateMachine {
 		Message message = new Message(app.MAC+":"+stateMachineId, Message.DATAGRAM_PORT, Message.Reading+registerReadings());
 		app.com.sendRemoteMessage(message);
 		returnControlToScheduler(false);
+		
 	}
 	
 	public String registerReadings() {

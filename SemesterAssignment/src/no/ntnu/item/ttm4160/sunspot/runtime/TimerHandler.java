@@ -112,4 +112,8 @@ public class TimerHandler extends Thread {
 	public int getSchedulingPriority() {
 		return priority;
 	}
+
+	public String getId() {
+		return stateMachineId;
+	}
 }

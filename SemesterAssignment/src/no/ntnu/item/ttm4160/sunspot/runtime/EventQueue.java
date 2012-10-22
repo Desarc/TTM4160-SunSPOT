@@ -117,5 +117,9 @@ public class EventQueue {
 	public int getSchedulingPriority() {
 		return priority;
 	}
+
+	public String getId() {
+		return stateMachineId;
+	}
 	
 }

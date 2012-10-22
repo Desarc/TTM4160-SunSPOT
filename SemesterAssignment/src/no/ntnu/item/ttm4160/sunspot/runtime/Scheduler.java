@@ -4,7 +4,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
-import no.ntnu.item.ttm4160.sunspot.SunSpotListener;
 import no.ntnu.item.ttm4160.sunspot.communication.*;
 import no.ntnu.item.ttm4160.sunspot.utils.*;
 
@@ -14,15 +13,12 @@ import no.ntnu.item.ttm4160.sunspot.utils.*;
  * and assigns them to their respective {@link StateMachine}s in the proper order.
  *
  */
-public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
+public class Scheduler {
 	
 	private Hashtable activeStateMachines;
-	private SunSpotApplication app;
 	private Hashtable eventQueues;
 	private Hashtable timerHandlers;
 	private int state;
-	private int nOfConnections;
-	private int maxConnections = 5;
 	
 	public static final int idle = 0; //no events being processed by any state machine
 	public static final int busy = 1; //a state machine is processing an event
@@ -36,141 +32,8 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 		eventQueues = new Hashtable();
 		timerHandlers = new Hashtable();
 		activeStateMachines = new Hashtable();
-		nOfConnections = 0;
 	}
 	
-	/**
-	 * Initiates a new scheduler with no active {@link StateMachine} and a reference to the {@link SunSpotApplication}.
-	 */
-	public Scheduler(SunSpotApplication app) {
-		this();
-		this.app = app;
-	}	
-	
-	/**
-	 * Handles a {@link Message} from the {@link Communications} module. Generates an {@link Event} based on the message content,
-	 * and places the event in the proper {@link EventQueue}. Creates a new {@link StateMachine} if applicable. Starts event
-	 * processing if no state machine is running.
-	 * @param message
-	 */
-	public synchronized void inputReceived(Message message) {
-		Event event = generateEvent(message);
-		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
-			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), this, app);
-			nOfConnections++;
-			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getPriority());
-			eventQueue.addEvent(event);
-			eventQueues.put(eventQueue.getStateMachineId(), eventQueue);
-		}
-		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
-			nOfConnections++;
-			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
-			queue.addEvent(event);
-		}
-		else if(message.getContent().equals(Message.Approved)) {
-			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
-			queue.addEvent(event);
-		}
-		else if(message.getContent().equals(Message.Denied)) {
-			nOfConnections--;
-			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
-			queue.addEvent(event);
-		}
-		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
-			nOfConnections--;
-			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
-			queue.addEvent(event);
-		}
-		else if(message.getContent().equals(Message.SenderDisconnect)) {
-			nOfConnections--;
-			EventQueue queue = (EventQueue)eventQueues.get(message.getReceiver());
-			queue.addEvent(event);
-		}
-		if (state == idle) {
-			getNextEvent();
-		}
-	}
-	
-	String id;
-	
-	/**
-	 * Handles an action from the {@link Communications} module. Generates an {@link Event} based on the action,
-	 * and places the event in the proper {@link EventQueue}. Creates a new {@link StateMachine} if applicable. Starts event
-	 * processing if no state machine is running.
-	 */
-	public void actionReceived(String action) {
-		if (action.equals(SunSpotApplication.button1)) {
-			
-			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), this, app);
-			activeStateMachines.put(test.getId(), test);
-			EventQueue eventQueue = new EventQueue(test.getId(), test.getPriority());
-			id = test.getId();
-			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-			eventQueue.addEvent(event);
-			eventQueues.put(test.getId(), eventQueue);
-			TimerHandler handler = new TimerHandler(test.getId(), this, test.getPriority());
-			timerHandlers.put(test.getId(), handler);
-//			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
-//			activeStateMachines.put(SendingStateMachine.getId(), SendingStateMachine);
-//			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getPriority());
-//			Event event = generateEvent(action, sendingStateMachine.getId());
-//			eventQueue.addEvent(event);
-//			eventQueues.put(sendingStateMachine.getId(), eventQueue);
-//			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), this, sendingStateMachine.getPriority());
-//			timerHandlers.put(sendingStateMachine.getId(), handler);
-		}
-		else if (action.equals(SunSpotApplication.button2)) {
-			Event event = new Event(Event.testOff, id, System.currentTimeMillis());
-			EventQueue eventQueue = (EventQueue)eventQueues.get(id);
-			eventQueue.addEvent(event);
-		}
-		if (state == idle) {
-			getNextEvent();
-		}
-	}
-	
-	/**
-	 * Generates an {@link Event} based on {@link Message} content.
-	 * @param message
-	 * @return {@link Event}
-	 */
-	private Event generateEvent(Message message) {
-		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
-			return new Event(Event.broadcast, message.getSender(), System.currentTimeMillis());
-		}
-		else if(message.getContent().equals(Message.ICanDisplayReadings)) {
-			return new Event(Event.broadcast_response, message.getReceiver(), message.getSender(), System.currentTimeMillis());
-		}
-		else if(message.getContent().equals(Message.Approved)) {
-			return new Event(Event.connectionApproved, message.getReceiver(), System.currentTimeMillis());
-		}
-		else if(message.getContent().equals(Message.Denied)) {
-			return new Event(Event.connectionDenied, message.getReceiver(), System.currentTimeMillis());
-		}
-		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
-			return new Event(Event.receiverDisconnect, message.getReceiver(), System.currentTimeMillis());
-		}
-		else if(message.getContent().equals(Message.SenderDisconnect)) {
-			return new Event(Event.senderDisconnect, message.getReceiver(), System.currentTimeMillis());
-		}
-		return new Event(0, "", System.currentTimeMillis());
-	}
-	
-	/**
-	 * Generates an event based on an action.
-	 * @param action {@link String}
-	 * @param stateMachineId The ID of the {@link StateMachine} this event is created for.
-	 * @return {@link Event}
-	 */
-	private Event generateEvent(String action, String stateMachineId) {
-		if (action.equals(SunSpotApplication.button1)) {
-			return new Event(Event.broadcast, stateMachineId, System.currentTimeMillis());
-		}
-		else if (action.equals(SunSpotApplication.button2)) {
-			return new Event(Event.disconnect, stateMachineId, System.currentTimeMillis());
-		}
-		return new Event(0, "", System.currentTimeMillis());
-	}
 	
 	/**
 	 * Saves an event to the proper {@link EventQueue}.
@@ -274,6 +137,31 @@ public class Scheduler implements ICommunicationLayerListener, SunSpotListener {
 			((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
 			timerHandlers.remove(stateMachineId);
 			eventQueues.remove(stateMachineId);
+		}
+		getNextEvent();
+	}
+
+	public synchronized void addStateMachine(StateMachine stateMachine) {
+		activeStateMachines.put(stateMachine.getId(), stateMachine);
+	}
+
+	public synchronized void addEventQueue(EventQueue eventQueue) {
+		eventQueues.put(eventQueue.getId(), eventQueue);
+	}
+
+	public synchronized void addTimerHandler(TimerHandler handler) {
+		timerHandlers.put(handler.getId(), handler);		
+	}
+	
+	/**
+	 * Adds an event to it's proper queue, and starts event processing if no {@link StateMachine} is running.
+	 * @param event
+	 */
+	public synchronized void addEvent(Event event) {
+		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
+		queue.addEvent(event);
+		if (state == busy) {
+			return;
 		}
 		getNextEvent();
 	}

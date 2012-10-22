@@ -28,6 +28,7 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
+import no.ntnu.item.ttm4160.sunspot.runtime.EventHandler;
 import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 
 import com.sun.spot.peripheral.Spot;
@@ -57,6 +58,7 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     public ISwitch sw1, sw2;
     public String MAC;
     public SunSpotListener listener;
+    public EventHandler eventHandler;
 	
     public static final String button1 = "button1";
 	public static final String button2 = "button2";
@@ -66,11 +68,12 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
         new BootloaderListener().start();   // monitor the USB (if connected) and recognize commands from host
         // So you don't have to reset SPOT to deploy new code on it.
 
-        scheduler = new Scheduler(this);
+        scheduler = new Scheduler();
+        eventHandler = new EventHandler(scheduler, this);
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
-        com.registerListener(scheduler);
-        listener = scheduler;
+        com.registerListener(eventHandler);
+        listener = eventHandler;
         sw1 = EDemoBoard.getInstance().getSwitches()[0];  
         sw2 = EDemoBoard.getInstance().getSwitches()[1];
         sw1.addISwitchListener(this);

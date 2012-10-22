@@ -100,6 +100,28 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
 		Utils.sleep(2000);
     }
     
+    public void blinkLEDs(LEDColor color){
+    	for(int i = 0; i < leds.length; i++) {
+    		leds[i].setColor(color);
+    	}
+    	setLEDsOn();
+    	long time = System.currentTimeMillis();
+    	while (System.currentTimeMillis() < time+200) {	}
+    	time = System.currentTimeMillis();
+    	setLEDsOff();
+    	while (System.currentTimeMillis() < time+200) {	}
+    	time = System.currentTimeMillis();
+    	setLEDsOn();
+    	while (System.currentTimeMillis() < time+200) {	}
+    	time = System.currentTimeMillis();
+    	setLEDsOff();
+    	while (System.currentTimeMillis() < time+200) {	}
+    	time = System.currentTimeMillis();
+    	setLEDsOn();
+    	while (System.currentTimeMillis() < time+200) {	}
+    	time = System.currentTimeMillis();
+    	setLEDsOff();
+    }
     
     protected void pauseApp() {
         // This will never be called by the Squawk VM
@@ -121,6 +143,18 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
     	
     	
+    }
+    
+    private void setLEDsOff() {
+    	for(int i = 0; i < leds.length; i++) {
+    		leds[i].setOff();
+    	}
+    }
+    
+    private void setLEDsOn() {
+    	for(int i = 0; i < leds.length; i++) {
+    		leds[i].setOn();
+    	}
     }
 
     /**

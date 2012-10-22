@@ -34,27 +34,27 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	 */
 	public void actionReceived(String action) {
 		if (action.equals(SunSpotApplication.button1)) {
-			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
-			EventQueue eventQueue = new EventQueue(test.getId(), test.getPriority());
-			id = test.getId();
-			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getPriority());
-			scheduler.addStateMachine(test);
+//			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
+//			EventQueue eventQueue = new EventQueue(test.getId(), test.getPriority());
+//			id = test.getId();
+//			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
+//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getPriority());
+//			scheduler.addStateMachine(test);
+//			scheduler.addEventQueue(eventQueue);
+//			scheduler.addTimerHandler(handler);
+//			scheduler.addEvent(event);
+			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
+			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getPriority());
+			Event event = generateEvent(action, sendingStateMachine.getId());
+			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getPriority());
+			scheduler.addStateMachine(sendingStateMachine);
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
-//			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), this, app);
-//			activeStateMachines.put(SendingStateMachine.getId(), SendingStateMachine);
-//			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getPriority());
-//			Event event = generateEvent(action, sendingStateMachine.getId());
-//			eventQueue.addEvent(event);
-//			eventQueues.put(sendingStateMachine.getId(), eventQueue);
-//			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), this, sendingStateMachine.getPriority());
-//			timerHandlers.put(sendingStateMachine.getId(), handler);
 		}
 		else if (action.equals(SunSpotApplication.button2)) {
-			Event event = new Event(Event.testOff, id, System.currentTimeMillis());
-			scheduler.addEvent(event);
+//			Event event = new Event(Event.testOff, id, System.currentTimeMillis());
+//			scheduler.addEvent(event);
 		}
 	}
 

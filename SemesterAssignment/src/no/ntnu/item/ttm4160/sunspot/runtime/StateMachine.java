@@ -50,7 +50,7 @@ public abstract class StateMachine extends Thread {
 	 */
 	public void assignEvent(Event event) {
 		currentEvent = event;
-		run();
+		//run();
 	}
 	
 	/**
@@ -73,7 +73,14 @@ public abstract class StateMachine extends Thread {
 	 * @param terminate Tells the scheduler if this state machine should be terminated.
 	 */
 	public void returnControlToScheduler(boolean terminate) {
-		scheduler.returnControl(terminate, stateMachineId);
+		try {
+			scheduler.notify();
+			wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//scheduler.returnControl(terminate, stateMachineId);
 	}
 	
 	public String getId() {

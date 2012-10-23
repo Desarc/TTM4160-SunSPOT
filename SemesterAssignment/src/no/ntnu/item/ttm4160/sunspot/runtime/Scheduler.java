@@ -88,6 +88,7 @@ public class Scheduler {
 			currentEvent = currentHandler.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
+			currentMachine.notify();
 			state = idle;
 			return;
 		}
@@ -103,8 +104,9 @@ public class Scheduler {
 		}
 		if (nextTime < Long.MAX_VALUE) {
 			currentEvent = currentQueue.getNextEvent();
-			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
+			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());		
 			currentMachine.assignEvent(currentEvent);
+			currentMachine.notify();
 			state = idle;
 			return;
 		}

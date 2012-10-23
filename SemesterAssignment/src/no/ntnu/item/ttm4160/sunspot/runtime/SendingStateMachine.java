@@ -7,7 +7,6 @@ import com.sun.spot.sensorboard.peripheral.LEDColor;
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.Message;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
-import no.ntnu.item.ttm4160.sunspot.utils.SPOTTimer;
 
 /**
  * State machine for broadcasting and sending readings to another SunSPOT.

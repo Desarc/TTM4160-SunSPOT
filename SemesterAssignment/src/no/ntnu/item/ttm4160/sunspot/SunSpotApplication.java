@@ -34,13 +34,10 @@ import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 import com.sun.spot.peripheral.Spot;
 import com.sun.spot.sensorboard.EDemoBoard;
 import com.sun.spot.sensorboard.peripheral.ILightSensor;
-import com.sun.spot.sensorboard.peripheral.ISwitch;
-import com.sun.spot.sensorboard.peripheral.ISwitchListener;
 import com.sun.spot.sensorboard.peripheral.ITriColorLED;
 import com.sun.spot.sensorboard.peripheral.LEDColor;
 import com.sun.spot.util.BootloaderListener;
 import com.sun.spot.util.IEEEAddress;
-import com.sun.spot.util.Utils;
 
 /*
  * The startApp method of this class is called by the VM to start the
@@ -123,18 +120,6 @@ public class SunSpotApplication extends MIDlet {
     protected void destroyApp(boolean unconditional) throws MIDletStateChangeException {
     	
     	
-    }
-    
-    private void setLEDsOff() {
-    	for(int i = 0; i < leds.length; i++) {
-    		leds[i].setOff();
-    	}
-    }
-    
-    private void setLEDsOn() {
-    	for(int i = 0; i < leds.length; i++) {
-    		leds[i].setOn();
-    	}
     }
     
     private void setLEDsOffDynamic(long gap) {

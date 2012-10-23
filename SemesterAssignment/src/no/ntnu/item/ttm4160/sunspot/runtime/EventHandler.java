@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import com.sun.spot.sensorboard.EDemoBoard;
 import com.sun.spot.sensorboard.peripheral.ISwitch;
 import com.sun.spot.sensorboard.peripheral.ISwitchListener;
-import com.sun.spot.sensorboard.peripheral.LEDColor;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
@@ -162,7 +161,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	}
 
 	/**
-     * Listens for button actions, and notifies listeners.
+     * Listens for button actions.
      */
 	public void switchPressed(ISwitch sw) {		
 		if (sw == sw1) {

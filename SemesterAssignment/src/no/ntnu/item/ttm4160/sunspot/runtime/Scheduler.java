@@ -158,7 +158,10 @@ public class Scheduler {
 	 * @param event
 	 */
 	public synchronized void addEvent(Event event) {
+		System.out.println("This statemachineID "+event.getStateMachineId());
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
+		System.out.println("Is eventques empty "+eventQueues.isEmpty());
+		System.out.println("this is the queue "+queue);
 		queue.addEvent(event);
 		if (state == busy) {
 			return;

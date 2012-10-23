@@ -36,8 +36,9 @@ public class SendingStateMachine extends StateMachine {
 	
 	public void run() {
 		if (currentEvent.getType() == Event.broadcast) {
-			System.out.println("Broadcasting request...");
+			
 			if (state == ready) {
+				System.out.println("\nBroadcasting request...\n");
 				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 500);
 				sendBroadcast();
 				state = wait_response;
@@ -46,21 +47,22 @@ public class SendingStateMachine extends StateMachine {
 		}
 		else if (currentEvent.getType() == Event.broadcast_response) {
 			if (state == wait_response) {
-				System.out.println("Received broadcast response, approving...");
+				System.out.println("\nReceived broadcast response, approving...\n");
 				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 100);
 				sendApproved();
 				state = sending;
 				returnControlToScheduler(false);
 			}
 			else {
-				System.out.println("Received broadcast response in wrong context, denying...");
+				System.out.println("\nReceived broadcast response in wrong context, denying...\n");
 				sendDenied();
 				returnControlToScheduler(false);
 			}
 		}
 		else if (currentEvent.getType() == Event.sendReadings) {
-			System.out.println("Sending light readings...");
+			
 			if (state == sending) {
+				System.out.println("\nSending light readings...\n");
 				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 100);
 				sendReadings();
 				state = sending;
@@ -68,16 +70,18 @@ public class SendingStateMachine extends StateMachine {
 			}
 		}
 		else if (currentEvent.getType() == Event.giveUp) {
-			System.out.println("No responses received, giving up.");
+			
 			if (state == wait_response) {
+				System.out.println("\nNo responses received, giving up.\n");
 				blinkLEDs();
 				state = ready;
 				returnControlToScheduler(false);
 			}
 		}
 		else if (currentEvent.getType() == Event.disconnect) {
-			System.out.println("Disconnecting...");
+			
 			if (state == sending) {
+				System.out.println("\nDisconnecting...\n");
 				sendDisconnect();
 				blinkLEDs();
 				state = ready;

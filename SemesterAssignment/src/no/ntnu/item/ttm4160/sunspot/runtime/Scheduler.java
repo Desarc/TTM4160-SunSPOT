@@ -165,6 +165,11 @@ public class Scheduler {
 		}
 		getNextEvent();
 	}
+	
+	public synchronized void killTimers(String stateMachineId) {
+		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
+		handler.killAllTimers();
+	}
 
 
 	public synchronized Enumeration getIDs() {

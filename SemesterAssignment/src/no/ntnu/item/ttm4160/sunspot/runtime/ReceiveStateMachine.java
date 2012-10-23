@@ -31,14 +31,14 @@ public class ReceiveStateMachine extends StateMachine {
 	
 	public void run() {
 		if (currentEvent.getType() == Event.broadcast) {
-			System.out.println("Broadcast received!");
 			if (state == free) {
+				System.out.println("\nBroadcast received!\n");
 				sendBroadcastResponse();
 				state = wait_approved;
 				returnControlToScheduler(false);
 			}
 			else if (state == wait_approved) {
-				System.out.println("Broadcast received, but already waiting. Saving for later.");
+				System.out.println("\nBroadcast received, but already waiting. Saving for later.\n");
 				scheduler.saveEvent(currentEvent, stateMachineId);
 				state = wait_approved;
 				returnControlToScheduler(false);
@@ -46,7 +46,7 @@ public class ReceiveStateMachine extends StateMachine {
 		}
 		else if (currentEvent.getType() == Event.connectionApproved) {
 			if (state == wait_approved) {
-				System.out.println("Connection approved!");
+				System.out.println("\nConnection approved!\n");
 				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 5000);
 				state = busy;
 				returnControlToScheduler(false);
@@ -54,22 +54,22 @@ public class ReceiveStateMachine extends StateMachine {
 		}
 		else if (currentEvent.getType() == Event.connectionDenied) {
 			if (state == wait_approved) {
-				System.out.println("Connection denied!");
+				System.out.println("\nConnection denied!\n");
 				state = free;
 				returnControlToScheduler(false);
 			}
 		}
 		else if (currentEvent.getType() == Event.senderDisconnect) {
-			System.out.println("Sender disconnected.");
 			if (state == busy) {
+				System.out.println("\nSender disconnected.\n");
 				blinkLEDs();
 				state = free;
 				returnControlToScheduler(true);
 			}
 		}
 		else if (currentEvent.getType() == Event.disconnect) {
-			System.out.println("Disconnecting...");
 			if (state == busy) {
+				System.out.println("\nDisconnecting...\n");
 				sendDisconnect();
 				blinkLEDs();
 				state = free;
@@ -77,8 +77,8 @@ public class ReceiveStateMachine extends StateMachine {
 			}
 		}
 		else if (currentEvent.getType() == Event.receiveReadings) {
-			System.out.println("Readings received.");
 			if (state == busy) {
+				System.out.println("\nReadings received.\n");
 				displayReadings();
 				resetGiveUpTimer();
 				state = busy;
@@ -91,8 +91,8 @@ public class ReceiveStateMachine extends StateMachine {
 			}
 		}
 		else if (currentEvent.getType() == Event.giveUp) {
-			System.out.println("Timeout! Assuming connection has died.");
 			if (state == busy) {
+				System.out.println("\nTimeout! Assuming connection has died.\n");
 				state = free;
 				returnControlToScheduler(false);
 			}
@@ -117,7 +117,8 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 
 	private void sendBroadcastResponse() {
-		sender = currentEvent.getData();
+		sender = currentEvent.getStateMachineId();
+		System.out.println(sender);
 		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
 		app.com.sendRemoteMessage(response);
 	}

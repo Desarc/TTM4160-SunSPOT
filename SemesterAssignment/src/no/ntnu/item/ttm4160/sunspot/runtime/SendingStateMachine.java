@@ -39,7 +39,7 @@ public class SendingStateMachine extends StateMachine {
 			
 			if (state == ready) {
 				System.out.println("\nBroadcasting request...\n");
-				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 500);
+				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 2000);
 				sendBroadcast();
 				state = wait_response;
 				returnControlToScheduler(false);
@@ -89,8 +89,9 @@ public class SendingStateMachine extends StateMachine {
 			}
 		}
 		else if (currentEvent.getType() == Event.receiverDisconnect) {
-			System.out.println("Receiver disconnected.");
+			
 			if (state == sending) {
+				System.out.println("\nReceiver disconnected.\n");
 				blinkLEDs();
 				state = ready;
 				returnControlToScheduler(false);

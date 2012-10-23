@@ -75,8 +75,10 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
+			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
 			scheduler.addStateMachine(receiveStateMachine);
 			scheduler.addEventQueue(eventQueue);
+			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {

@@ -73,7 +73,7 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	public synchronized void inputReceived(Message message) {
 		Event event = generateEvent(message);
 		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
-			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
+			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSenderId(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
 			scheduler.addStateMachine(receiveStateMachine);
@@ -122,22 +122,22 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	 */
 	private Event generateEvent(Message message) {
 		if(message.getReceiver().equals(Message.BROADCAST_ADDRESS)) {
-			return new Event(Event.broadcast, message.getSender(), System.currentTimeMillis());
+			return new Event(Event.broadcast, message.getSenderId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ICanDisplayReadings)) {
-			return new Event(Event.broadcast_response, message.getReceiverId(), message.getSender(), System.currentTimeMillis());
+			return new Event(Event.broadcast_response, message.getReceiverId(), message.getSenderId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Approved)) {
-			return new Event(Event.connectionApproved, message.getReceiver(), message.getSender(), System.currentTimeMillis());
+			return new Event(Event.connectionApproved, message.getReceiverId(), message.getSenderId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Denied)) {
-			return new Event(Event.connectionDenied, message.getReceiver(), message.getSender(), System.currentTimeMillis());
+			return new Event(Event.connectionDenied, message.getReceiverId(), message.getSenderId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
 			return new Event(Event.receiverDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
-			return new Event(Event.senderDisconnect, message.getReceiver(), System.currentTimeMillis());
+			return new Event(Event.senderDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		return new Event(0, "", System.currentTimeMillis());
 	}

@@ -62,6 +62,17 @@ public class Message {
 		return receiver;
 	}
 	
+	public String getReceiverId() {
+		int index=receiver.indexOf(":");
+		if(index==-1){
+			//":" not found
+			return receiver;
+		}
+		else{
+			return receiver.substring(index+1);
+		}
+	}
+	
 	public String getReceiverMAC(){
 		int index=receiver.indexOf(":");
 		if(index==-1){

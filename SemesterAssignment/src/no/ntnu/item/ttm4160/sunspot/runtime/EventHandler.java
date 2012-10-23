@@ -125,7 +125,7 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 			return new Event(Event.broadcast, message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ICanDisplayReadings)) {
-			return new Event(Event.broadcast_response, message.getReceiver(), message.getSender(), System.currentTimeMillis());
+			return new Event(Event.broadcast_response, message.getReceiverId(), message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Approved)) {
 			return new Event(Event.connectionApproved, message.getReceiver(), message.getSender(), System.currentTimeMillis());
@@ -134,7 +134,7 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 			return new Event(Event.connectionDenied, message.getReceiver(), message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
-			return new Event(Event.receiverDisconnect, message.getReceiver(), System.currentTimeMillis());
+			return new Event(Event.receiverDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
 			return new Event(Event.senderDisconnect, message.getReceiver(), System.currentTimeMillis());

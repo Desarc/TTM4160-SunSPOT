@@ -100,27 +100,32 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
 		Utils.sleep(2000);
     }
     
-    public void blinkLEDs(LEDColor color){
+    public void blinkLEDs(LEDColor color, long gap, int blinks) {
     	for(int i = 0; i < leds.length; i++) {
     		leds[i].setColor(color);
     	}
-    	setLEDsOn();
-    	long time = System.currentTimeMillis();
-    	while (System.currentTimeMillis() < time+200) {	}
-    	time = System.currentTimeMillis();
-    	setLEDsOff();
-    	while (System.currentTimeMillis() < time+200) {	}
-    	time = System.currentTimeMillis();
-    	setLEDsOn();
-    	while (System.currentTimeMillis() < time+200) {	}
-    	time = System.currentTimeMillis();
-    	setLEDsOff();
-    	while (System.currentTimeMillis() < time+200) {	}
-    	time = System.currentTimeMillis();
-    	setLEDsOn();
-    	while (System.currentTimeMillis() < time+200) {	}
-    	time = System.currentTimeMillis();
-    	setLEDsOff();
+    	for(int i = 0; i < blinks; i++) {
+    		setLEDsOn();
+    		long time = System.currentTimeMillis();
+    		while (System.currentTimeMillis() < time+gap) {	}
+    		time = System.currentTimeMillis();
+    		setLEDsOff();
+    		while (System.currentTimeMillis() < time+gap) {	}
+    	}
+    }
+    
+    public void blinkLEDsDynamic(LEDColor color, long gap1, long gap2, int blinks){
+    	for(int i = 0; i < leds.length; i++) {
+    		leds[i].setColor(color);
+    	}
+    	for(int i = 0; i < blinks; i++) {
+    		setLEDsOnDynamic(gap2);
+    		long time = System.currentTimeMillis();
+    		while (System.currentTimeMillis() < time+gap1) {	}
+    		time = System.currentTimeMillis();
+    		setLEDsOffDynamic(gap2);
+    		while (System.currentTimeMillis() < time+gap1) {	}
+    	}
     }
     
     protected void pauseApp() {
@@ -155,6 +160,62 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     	for(int i = 0; i < leds.length; i++) {
     		leds[i].setOn();
     	}
+    }
+    
+    private void setLEDsOffDynamic(long gap) {
+    	long time = System.currentTimeMillis();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[0].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[1].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[2].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[3].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[4].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[5].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[6].setOff();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[7].setOff();
+    }
+    
+    private void setLEDsOnDynamic(long gap) {
+    	long time = System.currentTimeMillis();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[0].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[1].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[2].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[3].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[4].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[5].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[6].setOn();
+    	while (System.currentTimeMillis() < time+gap) {	}
+    	time = System.currentTimeMillis();
+    	leds[7].setOn();
     }
 
     /**

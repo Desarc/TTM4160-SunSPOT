@@ -111,7 +111,7 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 
 	private void blinkLEDs() {
-		app.blinkLEDs(LEDColor.RED);
+		app.blinkLEDs(LEDColor.RED, 200, 3);
 	}
 
 	private void sendBroadcastResponse() {

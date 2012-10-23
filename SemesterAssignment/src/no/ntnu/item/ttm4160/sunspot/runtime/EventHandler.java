@@ -44,9 +44,9 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 //			scheduler.addTimerHandler(handler);
 //			scheduler.addEvent(event);
 			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
-			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getPriority());
+			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
 			Event event = generateEvent(action, sendingStateMachine.getId());
-			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getPriority());
+			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
 			scheduler.addStateMachine(sendingStateMachine);
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);

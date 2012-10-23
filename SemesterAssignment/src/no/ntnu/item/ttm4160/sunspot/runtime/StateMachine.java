@@ -80,4 +80,8 @@ public abstract class StateMachine extends Thread {
 		return stateMachineId;
 	}
 	
+	public int getStateMachinePriority() {
+		return this.priority;
+	}
+	
 }

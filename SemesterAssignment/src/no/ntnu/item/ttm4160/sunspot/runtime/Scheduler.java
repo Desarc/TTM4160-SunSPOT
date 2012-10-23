@@ -165,5 +165,10 @@ public class Scheduler {
 		}
 		getNextEvent();
 	}
+
+
+	public synchronized Enumeration getIDs() {
+		return activeStateMachines.keys();
+	}
 	
 }

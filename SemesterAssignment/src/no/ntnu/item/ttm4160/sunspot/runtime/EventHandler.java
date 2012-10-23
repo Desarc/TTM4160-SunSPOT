@@ -1,5 +1,7 @@
 package no.ntnu.item.ttm4160.sunspot.runtime;
 
+import java.util.Enumeration;
+
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.SunSpotListener;
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
@@ -25,8 +27,6 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 		this.scheduler = scheduler;
 		this.app = app;
 	}
-	
-	String id;
 
 	/**
 	 * Handles an action from the {@link Communications} module. Generates an {@link Event} based on the action,
@@ -53,8 +53,15 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 			scheduler.addEvent(event);
 		}
 		else if (action.equals(SunSpotApplication.button2)) {
-//			Event event = new Event(Event.testOff, id, System.currentTimeMillis());
-//			scheduler.addEvent(event);
+			disconnectAll();
+		}
+	}
+
+	private void disconnectAll() {
+		Enumeration ids = scheduler.getIDs();
+		while (ids.hasMoreElements()) {
+			Event event = new Event(Event.disconnect, ids.nextElement().toString(), System.currentTimeMillis());
+			scheduler.addEvent(event);
 		}
 	}
 
@@ -117,10 +124,10 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 			return new Event(Event.broadcast_response, message.getReceiver(), message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Approved)) {
-			return new Event(Event.connectionApproved, message.getReceiver(), System.currentTimeMillis());
+			return new Event(Event.connectionApproved, message.getReceiver(), message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Denied)) {
-			return new Event(Event.connectionDenied, message.getReceiver(), System.currentTimeMillis());
+			return new Event(Event.connectionDenied, message.getReceiver(), message.getSender(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
 			return new Event(Event.receiverDisconnect, message.getReceiver(), System.currentTimeMillis());

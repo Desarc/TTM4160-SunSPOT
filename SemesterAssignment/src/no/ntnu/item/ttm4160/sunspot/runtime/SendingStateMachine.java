@@ -21,6 +21,7 @@ public class SendingStateMachine extends StateMachine {
 	
 	
 	private int readings;
+	private String receiver;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -97,18 +98,19 @@ public class SendingStateMachine extends StateMachine {
 	}
 	
 	private void sendDenied() {
-		// TODO Auto-generated method stub
-		
+		Message denied = new Message(app.MAC+":"+stateMachineId, currentEvent.getData() , Message.Denied);
+		app.com.sendRemoteMessage(denied);
 	}
 
 	private void sendDisconnect() {
-		// TODO Auto-generated method stub
-		
+		Message disconnect = new Message(app.MAC+":"+stateMachineId, receiver , Message.SenderDisconnect);
+		app.com.sendRemoteMessage(disconnect);
 	}
 
 	private void sendApproved() {
-		// TODO Auto-generated method stub
-		
+		receiver = currentEvent.getData();
+		Message approved = new Message(app.MAC+":"+stateMachineId, currentEvent.getData() , Message.Approved);
+		app.com.sendRemoteMessage(approved);
 	}
 
 	private void blinkLEDs() {
@@ -118,14 +120,11 @@ public class SendingStateMachine extends StateMachine {
 	private void sendBroadcast() {
 		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.CanYouDisplayMyReadings);
 		app.com.sendRemoteMessage(message);
-		returnControlToScheduler(false);
 	}
 	
 	private void sendReadings() {
-		Message message = new Message(app.MAC+":"+stateMachineId, Message.DATAGRAM_PORT, Message.Reading+registerReadings());
+		Message message = new Message(app.MAC+":"+stateMachineId, receiver, Message.Reading+registerReadings());
 		app.com.sendRemoteMessage(message);
-		returnControlToScheduler(false);
-		
 	}
 	
 	private String registerReadings() {

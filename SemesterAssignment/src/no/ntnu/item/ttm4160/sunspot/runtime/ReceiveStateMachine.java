@@ -3,6 +3,7 @@ package no.ntnu.item.ttm4160.sunspot.runtime;
 import com.sun.spot.sensorboard.peripheral.LEDColor;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
+import no.ntnu.item.ttm4160.sunspot.communication.Message;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
 
 /**
@@ -14,6 +15,8 @@ public class ReceiveStateMachine extends StateMachine {
 	public static final int free = 0;
 	public static final int busy = 1;
 	public static final int wait_approved = 2;
+	
+	private String sender;
 	
 	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -42,16 +45,16 @@ public class ReceiveStateMachine extends StateMachine {
 			}
 		}
 		else if (currentEvent.getType() == Event.connectionApproved) {
-			System.out.println("Connection approved!");
 			if (state == wait_approved) {
+				System.out.println("Connection approved!");
 				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 5000);
 				state = busy;
 				returnControlToScheduler(false);
 			}
 		}
 		else if (currentEvent.getType() == Event.connectionDenied) {
-			System.out.println("Connection denied!");
 			if (state == wait_approved) {
+				System.out.println("Connection denied!");
 				state = free;
 				returnControlToScheduler(false);
 			}
@@ -102,12 +105,11 @@ public class ReceiveStateMachine extends StateMachine {
 	
 	private void resetGiveUpTimer() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	private void sendDisconnect() {
-		// TODO Auto-generated method stub
-		
+		Message disconnect = new Message(app.MAC+":"+stateMachineId, sender, Message.ReceiverDisconnect);
+		app.com.sendRemoteMessage(disconnect);
 	}
 
 	private void blinkLEDs() {
@@ -115,13 +117,13 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 
 	private void sendBroadcastResponse() {
-		// TODO Auto-generated method stub
-		
+		sender = currentEvent.getData();
+		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
+		app.com.sendRemoteMessage(response);
 	}
 
 	private void displayReadings() {
 		app.showLightreadings(Integer.parseInt(currentEvent.getData()));
-		returnControlToScheduler(false);
 	}
 	
 	

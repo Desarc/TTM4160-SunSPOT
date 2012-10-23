@@ -104,7 +104,7 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 	
 	private void resetGiveUpTimer() {
-		// TODO Auto-generated method stub
+		scheduler.killTimers(stateMachineId);
 	}
 
 	private void sendDisconnect() {

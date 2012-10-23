@@ -20,6 +20,8 @@ public abstract class StateMachine extends Thread {
 	 */
 	protected int priority = 0;
 	
+	public static final int Inf = Integer.MAX_VALUE;
+	
 	/**
 	 * 
 	 * @param stateMachineId The unique ID of this state machine. {@link String}
@@ -44,13 +46,18 @@ public abstract class StateMachine extends Thread {
 		this.priority = priority;
 	}
 	
+	public Thread startThread() {
+		Thread stateMachineThread = new Thread(this);
+		stateMachineThread.start();
+		return stateMachineThread;
+	}
 	/**
 	 * Assigns an events to this {@link StateMachine}, and lets it execute.
 	 * @param event
 	 */
 	public void assignEvent(Event event) {
 		currentEvent = event;
-		run();
+		//run();
 	}
 	
 	/**

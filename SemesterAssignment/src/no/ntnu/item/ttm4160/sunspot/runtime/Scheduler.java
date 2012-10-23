@@ -16,6 +16,7 @@ import no.ntnu.item.ttm4160.sunspot.utils.*;
 public class Scheduler {
 	
 	private Hashtable activeStateMachines;
+	private Hashtable activeThreads;
 	private Hashtable eventQueues;
 	private Hashtable timerHandlers;
 	private int state;
@@ -32,6 +33,7 @@ public class Scheduler {
 		eventQueues = new Hashtable();
 		timerHandlers = new Hashtable();
 		activeStateMachines = new Hashtable();
+		activeThreads = new Hashtable();
 	}
 	
 	
@@ -88,7 +90,8 @@ public class Scheduler {
 			currentEvent = currentHandler.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
-			state = idle;
+			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
+			currentThread.interrupt();
 			return;
 		}
 		
@@ -105,7 +108,8 @@ public class Scheduler {
 			currentEvent = currentQueue.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
-			state = idle;
+			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
+			currentThread.interrupt();
 			return;
 		}
 		//no events in any queue
@@ -118,10 +122,16 @@ public class Scheduler {
 	 * @param stateMachineId
 	 * @param event {@link Event} to be processed at timeout.
 	 * @param time Time before timeout. {@link long}
+	 * @return 
 	 */
-	public synchronized void addTimer(String stateMachineId, Event event, long time) {
+	public synchronized String addTimer(String stateMachineId, Event event, long time) {
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
-		handler.startNewTimer(time, event);
+		return handler.startNewTimer(time, event);
+	}
+	
+	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
+		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
+		handler.startTimer(timerId, event);
 	}
 
 	/**
@@ -144,6 +154,10 @@ public class Scheduler {
 	public synchronized void addStateMachine(StateMachine stateMachine) {
 		activeStateMachines.put(stateMachine.getId(), stateMachine);
 	}
+	
+	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
+		activeThreads.put(stateMachineId, stateMachineThread);
+	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
 		eventQueues.put(eventQueue.getId(), eventQueue);
@@ -158,10 +172,7 @@ public class Scheduler {
 	 * @param event
 	 */
 	public synchronized void addEvent(Event event) {
-		System.out.println("This statemachineID "+event.getStateMachineId());
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
-		System.out.println("Is eventques empty "+eventQueues.isEmpty());
-		System.out.println("this is the queue "+queue);
 		queue.addEvent(event);
 		if (state == busy) {
 			return;

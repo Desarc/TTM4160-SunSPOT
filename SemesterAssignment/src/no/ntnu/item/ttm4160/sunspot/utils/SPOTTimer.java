@@ -1,8 +1,5 @@
 package no.ntnu.item.ttm4160.sunspot.utils;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import no.ntnu.item.ttm4160.sunspot.runtime.TimerHandler;
 
 /**
@@ -10,11 +7,16 @@ import no.ntnu.item.ttm4160.sunspot.runtime.TimerHandler;
  * (and implicitly {@link StateMachine}) it belongs to, in addition to the time it should run.
  *
  */
-public class SPOTTimer extends Timer {
+public class SPOTTimer extends Thread {
 	
+	private String timerId;
 	private Event event;
 	private long time;
 	private TimerHandler handler;
+	private boolean running;
+	private boolean active;
+	
+	public static final long Inf = Integer.MAX_VALUE;
 	
 	/**
 	 * 
@@ -24,40 +26,60 @@ public class SPOTTimer extends Timer {
 	 */
 	
 	public SPOTTimer(long time, Event event, TimerHandler handler) {
+		this.timerId = ""+System.currentTimeMillis();
 		this.event = event;
 		this.time = time;
 		this.handler = handler;
+		running = false;
+		active = true;
 	}
 	
-	/**
-	 * Class specifying what to do in the case of a timeout.
-	 * @author Øyvin
-	 *
-	 */
-	class Timeout extends TimerTask {
-		SPOTTimer timer;
-		
-		public Timeout(SPOTTimer timer) {
-			this.timer = timer;
-		}
-		
-		/**
-		 * Notifies the handler that this timer has expired.
-		 */
-		public void run() {
-			handler.timeout(timer);
-		}
-		
+	public Thread startThread() {
+		Thread timerThread = new Thread(this);
+		timerThread.start();
+		return timerThread;
 	}
 	
-	/**
-	 * Starts the timer.
-	 */
-	public void start() {
-		schedule(new Timeout(this), time);
+	public void run() {
+		while (active) {
+			try {
+				sleep(Inf);					//sleep by default
+			} catch (InterruptedException e) {
+				running = true;				//if interrupted, start timer
+				while (running && active) {
+					try {
+						sleep(time);		//sleep for 'time' milliseconds (timer)
+					} catch (InterruptedException e1) {
+						continue;			//if interrupted, reset timer
+					}
+					running = false;
+					timeout();				//if not interrupted, timeout and go back to sleep
+				}	
+			}
+		}
+	}
+	
+	public void timeout() {
+		handler.timeout(this);
 	}
 
-	public Event getEvent() {
+	public synchronized Event getEvent() {
 		return event;
+	}
+	
+	public synchronized void setEvent(Event event) {
+		this.event = event;
+	}
+	
+	public String getTimerId() {
+		return timerId;
+	}
+	
+	public boolean isRunning() {
+		return running;
+	}
+	
+	public synchronized void deactivate() {
+		active = false;
 	}
 }

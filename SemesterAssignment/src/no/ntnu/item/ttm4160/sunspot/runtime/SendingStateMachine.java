@@ -7,8 +7,6 @@ import com.sun.spot.sensorboard.peripheral.LEDColor;
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.Message;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
-import no.ntnu.item.ttm4160.sunspot.utils.SPOTTimer;
-
 /**
  * State machine for broadcasting and sending readings to another SunSPOT.
  *
@@ -38,7 +36,9 @@ public class SendingStateMachine extends StateMachine {
 		if (currentEvent.getType() == Event.broadcast) {
 			
 			if (state == ready) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nBroadcasting request...\n");
+				System.out.println("------------------------------------------");
 				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 1000);
 				sendBroadcast();
 				state = wait_response;
@@ -47,14 +47,18 @@ public class SendingStateMachine extends StateMachine {
 		}
 		else if (currentEvent.getType() == Event.broadcast_response) {
 			if (state == wait_response) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nReceived broadcast response, approving...\n");
+				System.out.println("------------------------------------------");
 				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
 				sendApproved();
 				state = sending;
 				returnControlToScheduler(false);
 			}
 			else {
+				System.out.println("------------------------------------------");
 				System.out.println("\nReceived broadcast response in wrong context, denying...\n");
+				System.out.println("------------------------------------------");
 				sendDenied();
 				returnControlToScheduler(false);
 			}
@@ -62,8 +66,9 @@ public class SendingStateMachine extends StateMachine {
 		else if (currentEvent.getType() == Event.sendReadings) {
 			
 			if (state == sending) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nSending light readings...\n");
-				System.out.println("\nCurrent thread " +Thread.currentThread()+"\n");
+				System.out.println("------------------------------------------");
 				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
 				sendReadings();
 				state = sending;
@@ -73,7 +78,9 @@ public class SendingStateMachine extends StateMachine {
 		else if (currentEvent.getType() == Event.giveUp) {
 			
 			if (state == wait_response) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nNo responses received, giving up.\n");
+				System.out.println("------------------------------------------");
 				blinkLEDs();
 				state = ready;
 				returnControlToScheduler(false);
@@ -82,7 +89,9 @@ public class SendingStateMachine extends StateMachine {
 		else if (currentEvent.getType() == Event.disconnect) {
 			
 			if (state == sending) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nDisconnecting...\n");
+				System.out.println("------------------------------------------");
 				sendDisconnect();
 				blinkLEDs();
 				state = ready;
@@ -92,7 +101,9 @@ public class SendingStateMachine extends StateMachine {
 		else if (currentEvent.getType() == Event.receiverDisconnect) {
 			
 			if (state == sending) {
+				System.out.println("------------------------------------------");
 				System.out.println("\nReceiver disconnected.\n");
+				System.out.println("------------------------------------------");
 				blinkLEDs();
 				state = ready;
 				returnControlToScheduler(false);

@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import com.sun.spot.sensorboard.EDemoBoard;
 import com.sun.spot.sensorboard.peripheral.ISwitch;
 import com.sun.spot.sensorboard.peripheral.ISwitchListener;
-import com.sun.spot.sensorboard.peripheral.LEDColor;
 
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
@@ -47,11 +46,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	public void actionReceived(String action) {
 		if (action.equals(button1)) {
 //			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
-//			EventQueue eventQueue = new EventQueue(test.getId(), test.getPriority());
-//			id = test.getId();
+//			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
 //			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getPriority());
+//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getStateMachinePriority());
+//			Thread stateMachineThread = test.startThread();
 //			scheduler.addStateMachine(test);
+//			scheduler.addStateMachineThread(stateMachineThread, test.getId());
 //			scheduler.addEventQueue(eventQueue);
 //			scheduler.addTimerHandler(handler);
 //			scheduler.addEvent(event);
@@ -59,7 +59,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
 			Event event = generateEvent(action, sendingStateMachine.getId());
 			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
+			Thread stateMachineThread = sendingStateMachine.startThread();
 			scheduler.addStateMachine(sendingStateMachine);
+			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
@@ -72,7 +74,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	private void disconnectAll() {
 		Enumeration ids = scheduler.getIDs();
 		while (ids.hasMoreElements()) {
-			Event event = new Event(Event.disconnect, ids.nextElement().toString(), System.currentTimeMillis());
+			Event event = generateEvent(button2, ids.nextElement().toString());
 			scheduler.addEvent(event);
 		}
 	}
@@ -88,7 +90,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
+			Thread stateMachineThread = receiveStateMachine.startThread();
 			scheduler.addStateMachine(receiveStateMachine);
+			scheduler.addStateMachineThread(stateMachineThread, receiveStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
@@ -127,7 +131,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		else if (action.equals(button2)) {
 			return new Event(Event.disconnect, stateMachineId, System.currentTimeMillis());
 		}
-		return new Event(0, "", System.currentTimeMillis());
+		return new Event(Event.noEvent, "", System.currentTimeMillis());
 	}
 	
 	/**
@@ -158,7 +162,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			String reading = message.getContent().substring(message.getContent().indexOf(":")+1);
 			return new Event(Event.receiveReadings, message.getReceiverId(), reading, System.currentTimeMillis());
 		}
-		return new Event(0, "", System.currentTimeMillis());
+		return new Event(Event.noEvent, "", System.currentTimeMillis());
 	}
 
 	/**
@@ -174,7 +178,6 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	}
 
 	public void switchReleased(ISwitch sw) {
-		// TODO Auto-generated method stub
 		
 	}
 

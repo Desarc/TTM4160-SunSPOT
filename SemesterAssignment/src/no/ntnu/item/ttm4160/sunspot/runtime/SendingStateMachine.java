@@ -63,6 +63,7 @@ public class SendingStateMachine extends StateMachine {
 			
 			if (state == sending) {
 				System.out.println("\nSending light readings...\n");
+				System.out.println("\nCurrent thread " +Thread.currentThread()+"\n");
 				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 100);
 				sendReadings();
 				state = sending;
@@ -114,7 +115,7 @@ public class SendingStateMachine extends StateMachine {
 
 	private void sendApproved() {
 		receiver = currentEvent.getData();
-		Message approved = new Message(app.MAC+":"+stateMachineId, currentEvent.getData() , Message.Approved);
+		Message approved = new Message(app.MAC+":"+stateMachineId, receiver , Message.Approved);
 		app.com.sendRemoteMessage(approved);
 	}
 

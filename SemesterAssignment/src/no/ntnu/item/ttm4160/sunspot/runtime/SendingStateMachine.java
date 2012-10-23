@@ -112,7 +112,7 @@ public class SendingStateMachine extends StateMachine {
 	}
 
 	private void blinkLEDs() {
-		app.blinkLEDs(LEDColor.RED, 200, 3);
+		app.blinkLEDsDynamic(LEDColor.RED, 200, 0, 3);
 	}
 
 	private void sendBroadcast() {

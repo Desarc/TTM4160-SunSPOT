@@ -100,20 +100,6 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
 		Utils.sleep(2000);
     }
     
-    public void blinkLEDs(LEDColor color, long gap, int blinks) {
-    	for(int i = 0; i < leds.length; i++) {
-    		leds[i].setColor(color);
-    	}
-    	for(int i = 0; i < blinks; i++) {
-    		setLEDsOn();
-    		long time = System.currentTimeMillis();
-    		while (System.currentTimeMillis() < time+gap) {	}
-    		time = System.currentTimeMillis();
-    		setLEDsOff();
-    		while (System.currentTimeMillis() < time+gap) {	}
-    	}
-    }
-    
     public void blinkLEDsDynamic(LEDColor color, long gap1, long gap2, int blinks){
     	for(int i = 0; i < leds.length; i++) {
     		leds[i].setColor(color);
@@ -163,61 +149,21 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     }
     
     private void setLEDsOffDynamic(long gap) {
-    	long time = System.currentTimeMillis();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[0].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[1].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[2].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[3].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[4].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[5].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[6].setOff();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[7].setOff();
+    	for (int i = 0; i < leds.length; i++) {	
+    		leds[i].setOff();
+    		long time = System.currentTimeMillis();
+    		while (System.currentTimeMillis() < time+gap) {	}
+    	}
     }
     
     private void setLEDsOnDynamic(long gap) {
-    	long time = System.currentTimeMillis();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[0].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[1].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[2].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[3].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[4].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[5].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[6].setOn();
-    	while (System.currentTimeMillis() < time+gap) {	}
-    	time = System.currentTimeMillis();
-    	leds[7].setOn();
+    	for (int i = 0; i < leds.length; i++) {		
+    		leds[i].setOn();
+    		long time = System.currentTimeMillis();
+    		while (System.currentTimeMillis() < time+gap) {	}
+    	}
     }
-
+    
     /**
      * Listens for button actions, and notifies listeners.
      */

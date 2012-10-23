@@ -49,19 +49,15 @@ import com.sun.spot.util.Utils;
  * The manifest specifies this class as MIDlet-1, which means it will
  * be selected for execution.
  */
-public class SunSpotApplication extends MIDlet implements ISwitchListener {
+public class SunSpotApplication extends MIDlet {
 	
 	public Scheduler scheduler;
 	public Communications com;
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
-    public ISwitch sw1, sw2;
     public String MAC;
     public SunSpotListener listener;
     public EventHandler eventHandler;
-	
-    public static final String button1 = "button1";
-	public static final String button2 = "button2";
 	
     protected void startApp() throws MIDletStateChangeException {
     	
@@ -72,13 +68,7 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
         eventHandler = new EventHandler(scheduler, this);
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);
-        com.registerListener(eventHandler);
-        listener = eventHandler;
-        sw1 = EDemoBoard.getInstance().getSwitches()[0];  
-        sw2 = EDemoBoard.getInstance().getSwitches()[1];
-        sw1.addISwitchListener(this);
-        sw2.addISwitchListener(this);
-        
+        com.registerListener(eventHandler);        
     }
     
     public synchronized void showLightreadings(int value) {
@@ -97,7 +87,6 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
 			leds[j].setColor(LEDColor.GREEN);
 			leds[j].setOn();
 		}
-		Utils.sleep(2000);
     }
     
     public void blinkLEDsDynamic(LEDColor color, long gap1, long gap2, int blinks){
@@ -163,26 +152,5 @@ public class SunSpotApplication extends MIDlet implements ISwitchListener {
     		while (System.currentTimeMillis() < time+gap) {	}
     	}
     }
-    
-    /**
-     * Listens for button actions, and notifies listeners.
-     */
-	public void switchPressed(ISwitch sw) {
-		leds[0].setColor(LEDColor.RED);
-		leds[0].setOn();		
-		if (sw == sw1) {
-			listener.actionReceived(button1);
-		}
-		else {
-			listener.actionReceived(button2);
-		}
-		
-	}
-
-	public void switchReleased(ISwitch sw) {
-		// TODO Auto-generated method stub
-		
-	}
-
     
 }

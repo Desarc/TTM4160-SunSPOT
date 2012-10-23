@@ -2,8 +2,12 @@ package no.ntnu.item.ttm4160.sunspot.runtime;
 
 import java.util.Enumeration;
 
+import com.sun.spot.sensorboard.EDemoBoard;
+import com.sun.spot.sensorboard.peripheral.ISwitch;
+import com.sun.spot.sensorboard.peripheral.ISwitchListener;
+import com.sun.spot.sensorboard.peripheral.LEDColor;
+
 import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
-import no.ntnu.item.ttm4160.sunspot.SunSpotListener;
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
 import no.ntnu.item.ttm4160.sunspot.communication.ICommunicationLayerListener;
 import no.ntnu.item.ttm4160.sunspot.communication.Message;
@@ -13,10 +17,14 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
  * Class for handling communication messages and action events, and passing them to the scheduler.
  * This class is application-specific.
  */
-public class EventHandler implements ICommunicationLayerListener, SunSpotListener {
+public class EventHandler implements ICommunicationLayerListener, ISwitchListener {
 
 	private Scheduler scheduler;
 	private SunSpotApplication app;
+	private ISwitch sw1, sw2;
+	
+	public static final String button1 = "button1";
+	public static final String button2 = "button2";
 	
 	/**
 	 * 
@@ -26,6 +34,10 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	public EventHandler(Scheduler scheduler, SunSpotApplication app) {
 		this.scheduler = scheduler;
 		this.app = app;
+		 sw1 = EDemoBoard.getInstance().getSwitches()[0];  
+	     sw2 = EDemoBoard.getInstance().getSwitches()[1];
+	     sw1.addISwitchListener(this);
+	     sw2.addISwitchListener(this);
 	}
 
 	/**
@@ -33,7 +45,7 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	 * and passes the event to the {@link Scheduler}. Creates a new {@link StateMachine} if applicable.
 	 */
 	public void actionReceived(String action) {
-		if (action.equals(SunSpotApplication.button1)) {
+		if (action.equals(button1)) {
 //			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
 //			EventQueue eventQueue = new EventQueue(test.getId(), test.getPriority());
 //			id = test.getId();
@@ -52,7 +64,7 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
 		}
-		else if (action.equals(SunSpotApplication.button2)) {
+		else if (action.equals(button2)) {
 			disconnectAll();
 		}
 	}
@@ -97,6 +109,9 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
 			scheduler.addEvent(event);
 		}
+		else if(message.getContent().indexOf(Message.Reading) != -1) {
+			scheduler.addEvent(event);
+		}
 	}
 	
 	/**
@@ -106,10 +121,10 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 	 * @return {@link Event}
 	 */
 	private Event generateEvent(String action, String stateMachineId) {
-		if (action.equals(SunSpotApplication.button1)) {
+		if (action.equals(button1)) {
 			return new Event(Event.broadcast, stateMachineId, System.currentTimeMillis());
 		}
-		else if (action.equals(SunSpotApplication.button2)) {
+		else if (action.equals(button2)) {
 			return new Event(Event.disconnect, stateMachineId, System.currentTimeMillis());
 		}
 		return new Event(0, "", System.currentTimeMillis());
@@ -139,7 +154,29 @@ public class EventHandler implements ICommunicationLayerListener, SunSpotListene
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
 			return new Event(Event.senderDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
+		else if(message.getContent().indexOf(Message.Reading) != -1) {
+			String reading = message.getContent().substring(message.getContent().indexOf(":")+1);
+			return new Event(Event.receiveReadings, message.getReceiverId(), reading, System.currentTimeMillis());
+		}
 		return new Event(0, "", System.currentTimeMillis());
 	}
+
+	/**
+     * Listens for button actions, and notifies listeners.
+     */
+	public void switchPressed(ISwitch sw) {		
+		if (sw == sw1) {
+			actionReceived(button1);
+		}
+		else {
+			actionReceived(button2);
+		}
+	}
+
+	public void switchReleased(ISwitch sw) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

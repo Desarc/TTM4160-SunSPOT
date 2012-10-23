@@ -39,7 +39,7 @@ public class SendingStateMachine extends StateMachine {
 			
 			if (state == ready) {
 				System.out.println("\nBroadcasting request...\n");
-				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 2000);
+				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 1000);
 				sendBroadcast();
 				state = wait_response;
 				returnControlToScheduler(false);
@@ -48,7 +48,7 @@ public class SendingStateMachine extends StateMachine {
 		else if (currentEvent.getType() == Event.broadcast_response) {
 			if (state == wait_response) {
 				System.out.println("\nReceived broadcast response, approving...\n");
-				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 100);
+				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
 				sendApproved();
 				state = sending;
 				returnControlToScheduler(false);
@@ -64,7 +64,7 @@ public class SendingStateMachine extends StateMachine {
 			if (state == sending) {
 				System.out.println("\nSending light readings...\n");
 				System.out.println("\nCurrent thread " +Thread.currentThread()+"\n");
-				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 100);
+				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
 				sendReadings();
 				state = sending;
 				returnControlToScheduler(false);

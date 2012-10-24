@@ -31,7 +31,11 @@ public class ReceiveStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
-			if (currentEvent.getType() == Event.broadcast) {
+			if (currentEvent == null) {
+				System.out.println("Receive state machine interrupted without event");
+				returnControlToScheduler(false);
+			}
+			else if (currentEvent.getType() == Event.broadcast) {
 				if (state == free) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nBroadcast received!\n");
@@ -116,17 +120,19 @@ public class ReceiveStateMachine extends StateMachine {
 					System.out.println("\nTimeout! Assuming connection has died.\n");
 					System.out.println("------------------------------------------");
 					state = free;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else {
 				System.out.println("Event type not recognized.");
 				returnControlToScheduler(false);
 			}
-			try {
-				sleep(Inf);
-			} catch (InterruptedException e) { 
-				System.out.println("Receive state machine interrupted");
+			if (active) {
+				try {
+					sleep(Inf);
+				} catch (InterruptedException e) { 
+					System.out.println("Receive state machine interrupted");
+				}
 			}
 		}
 	}

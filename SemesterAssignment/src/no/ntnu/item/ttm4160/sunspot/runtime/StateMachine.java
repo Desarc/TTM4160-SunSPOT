@@ -101,4 +101,8 @@ public abstract class StateMachine extends Thread {
 	public void deactivate() {
 		active = false;
 	}
+	
+	public boolean isActive() {
+		return active;
+	}
 }

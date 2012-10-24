@@ -34,7 +34,11 @@ public class SendingStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
-			if (currentEvent.getType() == Event.broadcast) {
+			if (currentEvent == null) {
+				System.out.println("Sending state machine interrupted without event");
+				returnControlToScheduler(false);
+			}
+			else if (currentEvent.getType() == Event.broadcast) {
 				
 				if (state == ready) {
 					System.out.println("------------------------------------------");
@@ -88,7 +92,7 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("------------------------------------------");
 					blinkLEDs();
 					state = ready;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else if (currentEvent.getType() == Event.disconnect) {
@@ -100,7 +104,7 @@ public class SendingStateMachine extends StateMachine {
 					sendDisconnect();
 					blinkLEDs();
 					state = ready;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else if (currentEvent.getType() == Event.receiverDisconnect) {
@@ -111,17 +115,19 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("------------------------------------------");
 					blinkLEDs();
 					state = ready;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else {
 				returnControlToScheduler(false);
 			}
 			currentEvent = null;		//making sure the event is consumed
-			try {
-				sleep(Inf);
-			} catch (InterruptedException e) {	
-				System.out.println("Sending state machine interrupted");
+			if (active) {
+				try {
+					sleep(Inf);
+				} catch (InterruptedException e) {	
+					System.out.println("Sending state machine interrupted");
+				}
 			}
 		}
 	}

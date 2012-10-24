@@ -72,8 +72,8 @@ public class SunSpotApplication extends MIDlet {
     	
 		/**
 	     * Den har verdier fra 0-730. Dette var et tips jeg fikk fra internett.
-	     * Man deler 2 på 175 og ganger med average, da får man en verdi fra 0-8.
-	     * Dette kan da representere intensiteten og skru på de tilhørende ledsene.
+	     * Man deler 2 pï¿½ 175 og ganger med average, da fï¿½r man en verdi fra 0-8.
+	     * Dette kan da representere intensiteten og skru pï¿½ de tilhï¿½rende ledsene.
 	     */
 		for(int i = 0; i<intensity; i++) {
 			leds[i].setColor(LEDColor.RED);
@@ -86,6 +86,7 @@ public class SunSpotApplication extends MIDlet {
     }
     
     public void blinkLEDsDynamic(LEDColor color, long gap1, long gap2, int blinks){
+    	System.out.println("Blinking LEDS!");
     	for(int i = 0; i < leds.length; i++) {
     		leds[i].setColor(color);
     	}

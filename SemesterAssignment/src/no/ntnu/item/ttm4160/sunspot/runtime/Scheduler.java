@@ -151,12 +151,18 @@ public class Scheduler {
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
 		System.out.println("Control returned to scheduler");
 		if (terminate) {
-			activeStateMachines.remove(stateMachineId);
-			((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
-			timerHandlers.remove(stateMachineId);
-			eventQueues.remove(stateMachineId);
+			terminateStateMachine(stateMachineId);
 		}
 		getNextEvent();
+	}
+	
+	private synchronized void terminateStateMachine(String stateMachineId) {
+		((StateMachine)activeStateMachines.get(stateMachineId)).deactivate();
+		activeStateMachines.remove(stateMachineId);
+		activeThreads.remove(stateMachineId);
+		((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
+		timerHandlers.remove(stateMachineId);
+		eventQueues.remove(stateMachineId);
 	}
 
 	public synchronized void addStateMachine(StateMachine stateMachine) {
@@ -207,9 +213,17 @@ public class Scheduler {
 	}
 
 
-	public void resetTimer(String stateMachineId, String currentTimer) {
+	public synchronized void resetTimer(String stateMachineId, String currentTimer) {
 		System.out.println("Resetting timer");
 		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
+	}
+	
+	public synchronized boolean checkIfActive(String stateMachineId) {
+		StateMachine stateMachine = (StateMachine)activeStateMachines.get(stateMachineId);
+		if ( stateMachine != null) {
+			return stateMachine.isActive();
+		}
+		return false;
 	}
 	
 }

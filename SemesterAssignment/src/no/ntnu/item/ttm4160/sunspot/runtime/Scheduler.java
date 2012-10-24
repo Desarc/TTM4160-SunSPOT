@@ -43,6 +43,7 @@ public class Scheduler {
 	 * @param stateMachineId
 	 */
 	public synchronized void saveEvent(Event event, String stateMachineId) {
+		System.out.println("Event saved");
 		EventQueue queue = (EventQueue)eventQueues.get(stateMachineId);
 		queue.saveEvent(event);
 		
@@ -53,6 +54,7 @@ public class Scheduler {
 	 * no {@link StateMachine}s are running.
 	 */
 	public synchronized void timerNotify() {
+		System.out.println("Scheduler notified of timeout");
 		if (state == busy) {
 			return;
 		}
@@ -70,7 +72,7 @@ public class Scheduler {
 	 * scheduler.
 	 */
 	private synchronized void getNextEvent() {
-		
+		System.out.println("Getting next event");
 		state = busy;
 		EventQueue currentQueue = null;
 		TimerHandler currentHandler = null;
@@ -87,6 +89,7 @@ public class Scheduler {
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
+			System.out.println("Next event is timeout");
 			currentEvent = currentHandler.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
@@ -105,6 +108,7 @@ public class Scheduler {
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
+			System.out.println("Next event is normal event");
 			currentEvent = currentQueue.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
@@ -113,6 +117,7 @@ public class Scheduler {
 			return;
 		}
 		//no events in any queue
+		System.out.println("No event");
 		state = idle;
 		return;
 	}
@@ -125,11 +130,13 @@ public class Scheduler {
 	 * @return 
 	 */
 	public synchronized String addTimer(String stateMachineId, long time) {
+		System.out.println("New timer added");
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		return handler.startNewTimer(time);
 	}
 	
 	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
+		System.out.println("Timer started");
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.startTimer(timerId, event);
 	}
@@ -142,6 +149,7 @@ public class Scheduler {
 	 * @param stateMachineId
 	 */
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
+		System.out.println("Control returned to scheduler");
 		if (terminate) {
 			activeStateMachines.remove(stateMachineId);
 			((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
@@ -172,6 +180,7 @@ public class Scheduler {
 	 * @param event
 	 */
 	public synchronized void addEvent(Event event) {
+		System.out.println("Adding event");
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
 		queue.addEvent(event);
 		if (state == busy) {
@@ -180,9 +189,16 @@ public class Scheduler {
 		getNextEvent();
 	}
 	
-	public synchronized void killTimers(String stateMachineId) {
+	public synchronized void killAllTimers(String stateMachineId) {
+		System.out.println("Killing timers for "+stateMachineId);
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.killAllTimers();
+	}
+	
+	public synchronized void killTimer(String stateMachineId, String timerId) {
+		System.out.println("Killing timers for "+stateMachineId);
+		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
+		handler.killTimer(timerId);
 	}
 
 
@@ -192,6 +208,7 @@ public class Scheduler {
 
 
 	public void resetTimer(String stateMachineId, String currentTimer) {
+		System.out.println("Resetting timer");
 		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
 	}
 	

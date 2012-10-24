@@ -20,7 +20,6 @@ public class SendingStateMachine extends StateMachine {
 	
 	private int readings;
 	private String receiver;
-	private String currentTimer;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -34,91 +33,97 @@ public class SendingStateMachine extends StateMachine {
 	
 	
 	public void run() {
-		if (currentEvent.getType() == Event.broadcast) {
-			
-			if (state == ready) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nBroadcasting request...\n");
-				System.out.println("------------------------------------------");
-				Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
-				currentTimer = scheduler.addTimer(stateMachineId, 1000);
-				scheduler.startTimer(stateMachineId, currentTimer, giveUp);
-				sendBroadcast();
-				state = wait_response;
-				returnControlToScheduler(false);
+		while (active) {
+			if (currentEvent.getType() == Event.broadcast) {
+				
+				if (state == ready) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nBroadcasting request...\n");
+					System.out.println("------------------------------------------");
+					Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
+					currentTimer = scheduler.addTimer(stateMachineId, 1000);
+					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
+					sendBroadcast();
+					state = wait_response;
+					returnControlToScheduler(false);
+				}
 			}
-		}
-		else if (currentEvent.getType() == Event.broadcast_response) {
-			if (state == wait_response) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nReceived broadcast response, approving...\n");
-				System.out.println("------------------------------------------");
-				scheduler.killTimers(stateMachineId);
-				Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
-				currentTimer = scheduler.addTimer(stateMachineId, 400);
-				scheduler.startTimer(stateMachineId, currentTimer, timeout);
-				sendApproved();
-				state = sending;
-				returnControlToScheduler(false);
+			else if (currentEvent.getType() == Event.broadcast_response) {
+				if (state == wait_response) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nReceived broadcast response, approving...\n");
+					System.out.println("------------------------------------------");
+					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
+					currentTimer = scheduler.addTimer(stateMachineId, 400);
+					scheduler.startTimer(stateMachineId, currentTimer, timeout);
+					sendApproved();
+					state = sending;
+					returnControlToScheduler(false);
+				}
+				else {
+					System.out.println("------------------------------------------");
+					System.out.println("\nReceived broadcast response in wrong context, denying...\n");
+					System.out.println("------------------------------------------");
+					sendDenied();
+					returnControlToScheduler(false);
+				}
+			}
+			else if (currentEvent.getType() == Event.sendReadings) {
+				
+				if (state == sending) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nSending light readings...\n");
+					System.out.println("------------------------------------------");
+					scheduler.resetTimer(stateMachineId, currentTimer);
+					sendReadings();
+					state = sending;
+					returnControlToScheduler(false);
+				}
+			}
+			else if (currentEvent.getType() == Event.giveUp) {
+				
+				if (state == wait_response) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nNo responses received, giving up.\n");
+					System.out.println("------------------------------------------");
+					blinkLEDs();
+					state = ready;
+					returnControlToScheduler(false);
+				}
+			}
+			else if (currentEvent.getType() == Event.disconnect) {
+				
+				if (state == sending) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nDisconnecting...\n");
+					System.out.println("------------------------------------------");
+					sendDisconnect();
+					blinkLEDs();
+					state = ready;
+					returnControlToScheduler(false);
+				}
+			}
+			else if (currentEvent.getType() == Event.receiverDisconnect) {
+				
+				if (state == sending) {
+					System.out.println("------------------------------------------");
+					System.out.println("\nReceiver disconnected.\n");
+					System.out.println("------------------------------------------");
+					blinkLEDs();
+					state = ready;
+					returnControlToScheduler(false);
+				}
 			}
 			else {
-				System.out.println("------------------------------------------");
-				System.out.println("\nReceived broadcast response in wrong context, denying...\n");
-				System.out.println("------------------------------------------");
-				sendDenied();
 				returnControlToScheduler(false);
 			}
-		}
-		else if (currentEvent.getType() == Event.sendReadings) {
-			
-			if (state == sending) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nSending light readings...\n");
-				System.out.println("------------------------------------------");
-				scheduler.resetTimer(stateMachineId, currentTimer);
-				sendReadings();
-				state = sending;
-				returnControlToScheduler(false);
+			currentEvent = null;		//making sure the event is consumed
+			try {
+				sleep(Inf);
+			} catch (InterruptedException e) {	
+				System.out.println("Sending state machine interrupted");
 			}
 		}
-		else if (currentEvent.getType() == Event.giveUp) {
-			
-			if (state == wait_response) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nNo responses received, giving up.\n");
-				System.out.println("------------------------------------------");
-				blinkLEDs();
-				state = ready;
-				returnControlToScheduler(false);
-			}
-		}
-		else if (currentEvent.getType() == Event.disconnect) {
-			
-			if (state == sending) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nDisconnecting...\n");
-				System.out.println("------------------------------------------");
-				sendDisconnect();
-				blinkLEDs();
-				state = ready;
-				returnControlToScheduler(false);
-			}
-		}
-		else if (currentEvent.getType() == Event.receiverDisconnect) {
-			
-			if (state == sending) {
-				System.out.println("------------------------------------------");
-				System.out.println("\nReceiver disconnected.\n");
-				System.out.println("------------------------------------------");
-				blinkLEDs();
-				state = ready;
-				returnControlToScheduler(false);
-			}
-		}
-		else {
-			returnControlToScheduler(false);
-		}
-		currentEvent = null;		//making sure the event is consumed
 	}
 	
 	private void sendDenied() {

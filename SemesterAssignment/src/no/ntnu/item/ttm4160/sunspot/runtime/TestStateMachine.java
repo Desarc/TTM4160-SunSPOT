@@ -26,6 +26,7 @@ public class TestStateMachine extends StateMachine {
 	public void run() {
 		activeTimer = scheduler.addTimer(stateMachineId, 100);
 		while (true) {
+			System.out.println(Thread.currentThread());
 			if (currentEvent == null) {
 				
 			}

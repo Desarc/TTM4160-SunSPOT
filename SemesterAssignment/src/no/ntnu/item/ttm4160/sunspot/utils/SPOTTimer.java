@@ -46,6 +46,7 @@ public class SPOTTimer extends Thread {
 			} catch (InterruptedException e) {
 				running = true;				//if interrupted, start timer
 				while (running && active) {
+					//System.out.println(Thread.currentThread());
 					try {
 						sleep(time);		//sleep for 'time' milliseconds (timer)
 					} catch (InterruptedException e1) {

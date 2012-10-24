@@ -15,6 +15,8 @@ public abstract class StateMachine extends Thread {
 	protected Scheduler scheduler;
 	protected SunSpotApplication app;
 	protected Event currentEvent;
+	protected String currentTimer;
+	protected boolean active;
 	/*
 	 * Default priority is zero.
 	 */
@@ -32,6 +34,7 @@ public abstract class StateMachine extends Thread {
 		this.stateMachineId = stateMachineId;
 		this.scheduler = scheduler;
 		this.app = app;
+		this.active = true;
 	}
 	
 	/**
@@ -91,4 +94,11 @@ public abstract class StateMachine extends Thread {
 		return this.priority;
 	}
 	
+	public String getCurrentTimer() {
+		return currentTimer;
+	}
+	
+	public void deactivate() {
+		active = false;
+	}
 }

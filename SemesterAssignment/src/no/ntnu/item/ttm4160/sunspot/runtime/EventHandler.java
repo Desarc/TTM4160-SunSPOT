@@ -45,26 +45,26 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 */
 	public void actionReceived(String action) {
 		if (action.equals(button1)) {
-//			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
-//			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
-//			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getStateMachinePriority());
-//			Thread stateMachineThread = test.startThread();
-//			scheduler.addStateMachine(test);
-//			scheduler.addStateMachineThread(stateMachineThread, test.getId());
-//			scheduler.addEventQueue(eventQueue);
-//			scheduler.addTimerHandler(handler);
-//			scheduler.addEvent(event);
-			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
-			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
-			Event event = generateEvent(action, sendingStateMachine.getId());
-			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
-			Thread stateMachineThread = sendingStateMachine.startThread();
-			scheduler.addStateMachine(sendingStateMachine);
-			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
+			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
+			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
+			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
+			TimerHandler handler = new TimerHandler(test.getId(), scheduler, test.getStateMachinePriority());
+			Thread stateMachineThread = test.startThread();
+			scheduler.addStateMachine(test);
+			scheduler.addStateMachineThread(stateMachineThread, test.getId());
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
 			scheduler.addEvent(event);
+//			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
+//			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
+//			Event event = generateEvent(action, sendingStateMachine.getId());
+//			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
+//			Thread stateMachineThread = sendingStateMachine.startThread();
+//			scheduler.addStateMachine(sendingStateMachine);
+//			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
+//			scheduler.addEventQueue(eventQueue);
+//			scheduler.addTimerHandler(handler);
+//			scheduler.addEvent(event);
 		}
 		else if (action.equals(button2)) {
 			disconnectAll();
@@ -85,6 +85,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 * @param message
 	 */
 	public synchronized void inputReceived(Message message) {
+		System.out.println("Input received");
 		Event event = generateEvent(message);
 		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
@@ -98,7 +99,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
-			scheduler.killTimers(event.getStateMachineId());
+			scheduler.killAllTimers(event.getStateMachineId());
 			scheduler.addEvent(event);
 		}
 		else if(message.getContent().equals(Message.Approved)) {

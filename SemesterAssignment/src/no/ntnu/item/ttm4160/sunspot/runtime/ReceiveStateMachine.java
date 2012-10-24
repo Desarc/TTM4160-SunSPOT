@@ -120,6 +120,7 @@ public class ReceiveStateMachine extends StateMachine {
 					System.out.println("------------------------------------------");
 					System.out.println("\nTimeout! Assuming connection has died.\n");
 					System.out.println("------------------------------------------");
+					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
 				}

@@ -94,6 +94,7 @@ public class Scheduler {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
+			System.out.println("SCHEDULER INTERRUPTING THREAD "+currentThread);
 			currentThread.interrupt();
 			return;
 		}
@@ -113,6 +114,7 @@ public class Scheduler {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
+			System.out.println("SCHEDULER INTERRUPTING THREAD "+currentThread);
 			currentThread.interrupt();
 			return;
 		}

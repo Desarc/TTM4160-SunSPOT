@@ -131,7 +131,7 @@ public class ReceiveStateMachine extends StateMachine {
 			if (active) {
 				try {
 					sleep(Inf);
-				} catch (InterruptedException e) { 
+				} catch (InterruptedException e) { 					
 					System.out.println("Receive state machine interrupted");
 				}
 			}
@@ -139,7 +139,7 @@ public class ReceiveStateMachine extends StateMachine {
 	}
 	
 	private void resetGiveUpTimer() {
-		scheduler.killTimer(stateMachineId, currentTimer);
+		scheduler.resetTimer(stateMachineId, currentTimer);
 	}
 
 	private void sendDisconnect() {
@@ -153,8 +153,12 @@ public class ReceiveStateMachine extends StateMachine {
 
 	private void sendBroadcastResponse() {
 		sender = currentEvent.getStateMachineId();
-		System.out.println(sender);
 		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
+		try {
+			sleep(200);
+		} catch (InterruptedException e) {
+			System.out.println("WRONGLY TIMED INTERRUPT!");
+		}
 		app.com.sendRemoteMessage(response);
 	}
 

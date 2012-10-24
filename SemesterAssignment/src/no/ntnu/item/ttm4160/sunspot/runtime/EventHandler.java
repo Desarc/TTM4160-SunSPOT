@@ -86,8 +86,11 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 */
 	public synchronized void inputReceived(Message message) {
 		System.out.println("Input received");
-		Event event = generateEvent(message);
-		if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
+		Event event = generateEvent(message);scheduler.addEvent(event);
+		if (!scheduler.checkIfActive(event.getStateMachineId()) && !message.getContent().equals(Message.CanYouDisplayMyReadings)) {
+			System.out.println("Event received for inactive state machine, discarding.");
+		}
+		else if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
@@ -99,53 +102,11 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
 				scheduler.killAllTimers(event.getStateMachineId());
 				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
 		}
-		else if(message.getContent().equals(Message.Approved)) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
-				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
-		}
-		else if(message.getContent().equals(Message.Denied)) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
-				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
-		}
-		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
-				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
-		}
-		else if(message.getContent().equals(Message.SenderDisconnect)) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
-				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
-		}
-		else if(message.getContent().indexOf(Message.Reading) != -1) {
-			if (scheduler.checkIfActive(event.getStateMachineId())) {
-				scheduler.addEvent(event);
-			}
-			else {
-				System.out.println("Event received for inactive state machine, discarding.");
-			}
+		else {
+			scheduler.addEvent(event);
 		}
 	}
 	

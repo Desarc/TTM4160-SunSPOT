@@ -42,8 +42,8 @@ public class TimerHandler extends Thread {
 	 * @param time {@link long}
 	 * @param event {@link Event}
 	 */
-	public synchronized String startNewTimer(long time, Event event) {
-		SPOTTimer timer = new SPOTTimer(time, event, this);
+	public synchronized String startNewTimer(long time) {
+		SPOTTimer timer = new SPOTTimer(time, this);
 		activeTimers.put(timer.getTimerId(), timer);
 		Thread timerThread = timer.startThread();
 		activeTimerThreads.put(timer.getTimerId(), timerThread);

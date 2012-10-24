@@ -124,9 +124,9 @@ public class Scheduler {
 	 * @param time Time before timeout. {@link long}
 	 * @return 
 	 */
-	public synchronized String addTimer(String stateMachineId, Event event, long time) {
+	public synchronized String addTimer(String stateMachineId, long time) {
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
-		return handler.startNewTimer(time, event);
+		return handler.startNewTimer(time);
 	}
 	
 	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
@@ -188,6 +188,11 @@ public class Scheduler {
 
 	public synchronized Enumeration getIDs() {
 		return activeStateMachines.keys();
+	}
+
+
+	public void resetTimer(String stateMachineId, String currentTimer) {
+		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
 	}
 	
 }

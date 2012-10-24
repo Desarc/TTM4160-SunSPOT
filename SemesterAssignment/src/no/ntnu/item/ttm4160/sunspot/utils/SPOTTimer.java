@@ -25,9 +25,8 @@ public class SPOTTimer extends Thread {
 	 * @param handler The {@link TimerHandler} to notify at timeout.
 	 */
 	
-	public SPOTTimer(long time, Event event, TimerHandler handler) {
+	public SPOTTimer(long time, TimerHandler handler) {
 		this.timerId = ""+System.currentTimeMillis();
-		this.event = event;
 		this.time = time;
 		this.handler = handler;
 		running = false;

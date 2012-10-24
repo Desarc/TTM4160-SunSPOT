@@ -20,6 +20,7 @@ public class SendingStateMachine extends StateMachine {
 	
 	private int readings;
 	private String receiver;
+	private String currentTimer;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -39,7 +40,9 @@ public class SendingStateMachine extends StateMachine {
 				System.out.println("------------------------------------------");
 				System.out.println("\nBroadcasting request...\n");
 				System.out.println("------------------------------------------");
-				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 1000);
+				Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
+				currentTimer = scheduler.addTimer(stateMachineId, 1000);
+				scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 				sendBroadcast();
 				state = wait_response;
 				returnControlToScheduler(false);
@@ -50,7 +53,10 @@ public class SendingStateMachine extends StateMachine {
 				System.out.println("------------------------------------------");
 				System.out.println("\nReceived broadcast response, approving...\n");
 				System.out.println("------------------------------------------");
-				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
+				scheduler.killTimers(stateMachineId);
+				Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
+				currentTimer = scheduler.addTimer(stateMachineId, 400);
+				scheduler.startTimer(stateMachineId, currentTimer, timeout);
 				sendApproved();
 				state = sending;
 				returnControlToScheduler(false);
@@ -69,7 +75,7 @@ public class SendingStateMachine extends StateMachine {
 				System.out.println("------------------------------------------");
 				System.out.println("\nSending light readings...\n");
 				System.out.println("------------------------------------------");
-				scheduler.addTimer(stateMachineId, new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis()), 400);
+				scheduler.resetTimer(stateMachineId, currentTimer);
 				sendReadings();
 				state = sending;
 				returnControlToScheduler(false);
@@ -112,6 +118,7 @@ public class SendingStateMachine extends StateMachine {
 		else {
 			returnControlToScheduler(false);
 		}
+		currentEvent = null;		//making sure the event is consumed
 	}
 	
 	private void sendDenied() {

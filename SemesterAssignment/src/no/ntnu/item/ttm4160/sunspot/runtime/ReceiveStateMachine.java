@@ -17,6 +17,7 @@ public class ReceiveStateMachine extends StateMachine {
 	public static final int wait_approved = 2;
 	
 	private String sender;
+	private String currentTimer;
 	
 	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -53,7 +54,9 @@ public class ReceiveStateMachine extends StateMachine {
 				System.out.println("------------------------------------------");
 				System.out.println("\nConnection approved!\n");
 				System.out.println("------------------------------------------");
-				scheduler.addTimer(stateMachineId, new Event(Event.giveUp, stateMachineId, System.currentTimeMillis()), 5000);
+				Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
+				currentTimer = scheduler.addTimer(stateMachineId, 5000);
+				scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 				state = busy;
 				returnControlToScheduler(false);
 			}
@@ -105,6 +108,7 @@ public class ReceiveStateMachine extends StateMachine {
 				sendDisconnect();
 				returnControlToScheduler(false);
 			}
+			currentEvent = null;		//making sure the event is consumed
 		}
 		else if (currentEvent.getType() == Event.giveUp) {
 			if (state == busy) {

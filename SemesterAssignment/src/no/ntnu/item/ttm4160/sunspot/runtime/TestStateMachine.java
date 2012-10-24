@@ -24,7 +24,7 @@ public class TestStateMachine extends StateMachine {
 	}
 	
 	public void run() {
-		activeTimer = scheduler.addTimer(stateMachineId, new Event(Event.noEvent, stateMachineId, System.currentTimeMillis()), 100);
+		activeTimer = scheduler.addTimer(stateMachineId, 100);
 		while (true) {
 			if (currentEvent == null) {
 				

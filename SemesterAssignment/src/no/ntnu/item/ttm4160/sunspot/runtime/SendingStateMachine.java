@@ -34,6 +34,7 @@ public class SendingStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
+			System.out.println("sending thread: "+Thread.currentThread());
 			if (currentEvent == null) {
 				System.out.println("Sending state machine interrupted without event");
 				returnControlToScheduler(false);

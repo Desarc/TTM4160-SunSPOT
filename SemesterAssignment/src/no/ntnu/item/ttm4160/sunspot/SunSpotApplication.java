@@ -56,7 +56,7 @@ public class SunSpotApplication extends MIDlet {
     public EventHandler eventHandler;
 	
     protected void startApp() throws MIDletStateChangeException {
-    	
+    	System.out.println("Main thread: "+Thread.currentThread());
         new BootloaderListener().start();   // monitor the USB (if connected) and recognize commands from host
         // So you don't have to reset SPOT to deploy new code on it.
 

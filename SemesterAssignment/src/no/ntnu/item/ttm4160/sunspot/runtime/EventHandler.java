@@ -86,11 +86,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 */
 	public synchronized void inputReceived(Message message) {
 		System.out.println("Input received");
-		Event event = generateEvent(message);scheduler.addEvent(event);
+		Event event = generateEvent(message);
 		if (!scheduler.checkIfActive(event.getStateMachineId()) && !message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			System.out.println("Event received for inactive state machine, discarding.");
 		}
 		else if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
+			System.out.println("Broadcast received by event handler");
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());

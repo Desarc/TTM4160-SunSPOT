@@ -31,6 +31,7 @@ public class ReceiveStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
+			System.out.println("Receiving thread: "+Thread.currentThread());
 			if (currentEvent == null) {
 				System.out.println("Receive state machine interrupted without event");
 				returnControlToScheduler(false);

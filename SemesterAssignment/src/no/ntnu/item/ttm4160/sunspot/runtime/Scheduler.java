@@ -19,10 +19,10 @@ public class Scheduler {
 	private Hashtable activeThreads;
 	private Hashtable eventQueues;
 	private Hashtable timerHandlers;
-	private int state;
+	private String state;
 	
-	public static final int idle = 0; //no events being processed by any state machine
-	public static final int busy = 1; //a state machine is processing an event
+	public static final String idle = "idle"; //no events being processed by any state machine
+	public static final String busy = "busy"; //a state machine is processing an event
 	
 	
 	/**
@@ -72,7 +72,7 @@ public class Scheduler {
 	 * scheduler.
 	 */
 	private synchronized void getNextEvent() {
-		System.out.println("Getting next event");
+		System.out.println("Getting next event, state: "+state);
 		state = busy;
 		EventQueue currentQueue = null;
 		TimerHandler currentHandler = null;
@@ -166,18 +166,22 @@ public class Scheduler {
 	}
 
 	public synchronized void addStateMachine(StateMachine stateMachine) {
+		System.out.println("Adding state machine "+stateMachine.getId());
 		activeStateMachines.put(stateMachine.getId(), stateMachine);
 	}
 	
 	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
+		System.out.println("Adding state machine thread "+stateMachineId);
 		activeThreads.put(stateMachineId, stateMachineThread);
 	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
+		System.out.println("Adding event queue "+eventQueue.getId());
 		eventQueues.put(eventQueue.getId(), eventQueue);
 	}
 
 	public synchronized void addTimerHandler(TimerHandler handler) {
+		System.out.println("Adding timer handler "+handler.getId());
 		timerHandlers.put(handler.getId(), handler);		
 	}
 	

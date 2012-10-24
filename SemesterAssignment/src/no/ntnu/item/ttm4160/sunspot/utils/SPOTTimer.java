@@ -41,6 +41,7 @@ public class SPOTTimer extends Thread {
 	
 	public void run() {
 		while (active) {
+			System.out.println("Timer thread: "+Thread.currentThread());
 			try {
 				sleep(Inf);					//sleep by default
 			} catch (InterruptedException e) {

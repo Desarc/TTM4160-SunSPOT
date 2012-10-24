@@ -6,7 +6,7 @@ package no.ntnu.item.ttm4160.sunspot.utils;
  */
 public class Event {
 
-	private int type;
+	private String type;
 	private String stateMachineId;
 	private String data;
 	private long timestamp;
@@ -14,29 +14,29 @@ public class Event {
 	/*
 	 * Event types:
 	 */
-	public static final int noEvent = 0;
-	public static final int sendReadings = 1;
-	public static final int broadcast = 2;
-	public static final int broadcast_response = 3;
-	public static final int receiveReadings = 4;
-	public static final int connectionApproved = 5;
-	public static final int connectionDenied = 6;
-	public static final int disconnect = 7;
-	public static final int receiverDisconnect = 7;
-	public static final int senderDisconnect = 8;
-	public static final int giveUp = 9;
+	public static final String noEvent = "no event";
+	public static final String sendReadings = "send readings";
+	public static final String broadcast = "broadcast";
+	public static final String broadcast_response = "broadcast response";
+	public static final String receiveReadings = "readings received";
+	public static final String connectionApproved = "connection approved";
+	public static final String connectionDenied = "connection denied";
+	public static final String disconnect = "disconnect";
+	public static final String receiverDisconnect = "receiver disconnected";
+	public static final String senderDisconnect = "sender disconnected";
+	public static final String giveUp = "give up";
 	
 	
-	public static final int testOn = 12;
-	public static final int testOff = 11;
+	public static final String testOn = "On";
+	public static final String testOff = "Off";
 	
-	public Event(int type, String stateMachineId, long timestamp) {
+	public Event(String type, String stateMachineId, long timestamp) {
 		this.type = type;
 		this.stateMachineId = stateMachineId;
 		this.timestamp = timestamp;
 	}
 	
-	public Event(int type, String stateMachineId, String data, long timestamp) {
+	public Event(String type, String stateMachineId, String data, long timestamp) {
 		this(type, stateMachineId, timestamp);
 		this.data = data;
 	}
@@ -46,7 +46,7 @@ public class Event {
 	 * 
 	 * @return
 	 */
-	public int getType() {
+	public String getType() {
 		return type;	
 	}
 	

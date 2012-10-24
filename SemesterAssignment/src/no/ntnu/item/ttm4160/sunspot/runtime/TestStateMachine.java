@@ -30,7 +30,7 @@ public class TestStateMachine extends StateMachine {
 			if (currentEvent == null) {
 				
 			}
-			else if (currentEvent.getType() == Event.testOn && (state == idle || state == off) ) {
+			else if (currentEvent.getType().equals(Event.testOn) && (state == idle || state == off) ) {
 				for (int i = 0; i < app.leds.length; i++) {
 					app.leds[i].setColor(LEDColor.BLUE);
 					app.leds[i].setOn();

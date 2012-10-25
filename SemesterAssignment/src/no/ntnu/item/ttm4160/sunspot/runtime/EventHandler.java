@@ -192,6 +192,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
 			decreaseActiveSendConnections();
+			scheduler.killAllTimers(message.getReceiverId());
 			return new Event(Event.receiverDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.SenderDisconnect)) {

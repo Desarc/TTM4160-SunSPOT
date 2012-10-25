@@ -13,7 +13,7 @@ import no.ntnu.item.ttm4160.sunspot.utils.*;
  * and assigns them to their respective {@link StateMachine}s in the proper order.
  *
  */
-public class Scheduler {
+public class Scheduler extends Thread {
 	
 	private Hashtable activeStateMachines;
 	private Hashtable activeThreads;
@@ -24,6 +24,7 @@ public class Scheduler {
 	public static final String idle = "idle"; //no events being processed by any state machine
 	public static final String busy = "busy"; //a state machine is processing an event
 	
+	public static final int Inf = Integer.MAX_VALUE;
 	
 	/**
 	 * Initiates a new scheduler with no active {@link StateMachine}.
@@ -36,6 +37,18 @@ public class Scheduler {
 		activeThreads = new Hashtable();
 	}
 	
+	
+	public void run() {
+		while (true) {
+			try {
+				System.out.println("Scheduler going to sleep...");
+				sleep(Inf);
+			} catch (InterruptedException e) {
+				System.out.println("Scheduler thread: "+Thread.currentThread());
+				getNextEvent();
+			}
+		}
+	}
 	
 	/**
 	 * Saves an event to the proper {@link EventQueue}.
@@ -58,7 +71,9 @@ public class Scheduler {
 		if (state == busy) {
 			return;
 		}
-		getNextEvent();
+		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		interrupt();
+		//getNextEvent();
 	}
 	
 	/**
@@ -79,7 +94,28 @@ public class Scheduler {
 		Event currentEvent;
 		long nextTime = Long.MAX_VALUE;
 		
-		//timeout-events have priority
+		//internal events must be prioritized first
+		for (Enumeration e = eventQueues.keys(); e.hasMoreElements() ;) {
+			EventQueue queue = (EventQueue)eventQueues.get(e.nextElement());
+			long time = queue.checkInternalTimeStamps();
+			if (time < nextTime) {
+				nextTime = time;
+				currentQueue = queue;
+			}
+		}
+		if (nextTime < Long.MAX_VALUE) {
+			System.out.println("Next event is internal event.");
+			currentEvent = currentQueue.getNextEvent();
+			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
+			currentMachine.assignEvent(currentEvent);
+			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
+			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			currentThread.interrupt();
+			return;
+		}
+		
+		
+		//timeout events have priority over external events
 		for (Enumeration e = timerHandlers.keys(); e.hasMoreElements() ;) {
 			TimerHandler handler = (TimerHandler)timerHandlers.get(e.nextElement());
 			long time = handler.checkTimeoutQueue();
@@ -94,27 +130,27 @@ public class Scheduler {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			System.out.println("SCHEDULER INTERRUPTING THREAD "+currentThread);
+			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			currentThread.interrupt();
 			return;
 		}
 		
-		//checking for other events if there are no timeouts
+		//checking for external events, if there are no timeouts or internal events
 		for (Enumeration e = eventQueues.keys(); e.hasMoreElements() ;) {
 			EventQueue queue = (EventQueue)eventQueues.get(e.nextElement());
-			long time = queue.checkTimeStamps();
+			long time = queue.checkExternalTimeStamps();
 			if (time < nextTime) {
 				nextTime = time;
 				currentQueue = queue;
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
-			System.out.println("Next event is normal event");
+			System.out.println("Next event is external event");
 			currentEvent = currentQueue.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			System.out.println("SCHEDULER INTERRUPTING THREAD "+currentThread);
+			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			currentThread.interrupt();
 			return;
 		}
@@ -155,7 +191,9 @@ public class Scheduler {
 		if (terminate) {
 			terminateStateMachine(stateMachineId);
 		}
-		getNextEvent();
+		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		interrupt();
+		//getNextEvent();
 	}
 	
 	private synchronized void terminateStateMachine(String stateMachineId) {
@@ -198,7 +236,9 @@ public class Scheduler {
 		if (state == busy) {
 			return;
 		}
-		getNextEvent();
+		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		interrupt();
+		//getNextEvent();
 	}
 	
 	/**
@@ -212,7 +252,9 @@ public class Scheduler {
 		if (state == busy) {
 			return;
 		}
-		getNextEvent();
+		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		interrupt();
+		//getNextEvent();
 	}
 	
 	public synchronized void killAllTimers(String stateMachineId) {

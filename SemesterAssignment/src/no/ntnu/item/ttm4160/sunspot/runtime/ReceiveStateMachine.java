@@ -40,6 +40,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == free) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nBroadcast received!\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					sendBroadcastResponse();
 					state = wait_approved;
@@ -48,6 +49,7 @@ public class ReceiveStateMachine extends StateMachine {
 				else if (state == wait_approved) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nBroadcast received, but already waiting. Saving for later.\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					scheduler.saveEvent(currentEvent, stateMachineId);
 					state = wait_approved;
@@ -58,6 +60,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == wait_approved) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nConnection approved!\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					Event giveUp = new Event(Event.receiverGiveUp, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 5000);
@@ -70,6 +73,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == wait_approved) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nConnection denied!\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					state = free;
 					returnControlToScheduler(false);
@@ -79,6 +83,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == busy) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nSender disconnected.\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					blinkLEDs();
 					state = free;
@@ -89,6 +94,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == busy) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nDisconnecting...\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
 					System.out.println("------------------------------------------");
 					sendDisconnect();
 					blinkLEDs();
@@ -100,6 +106,7 @@ public class ReceiveStateMachine extends StateMachine {
 				if (state == busy) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nReadings received.\n");
+					System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+currentEvent.getStateMachineId());
 					System.out.println("------------------------------------------");
 					displayReadings();
 					resetGiveUpTimer();
@@ -156,7 +163,7 @@ public class ReceiveStateMachine extends StateMachine {
 		sender = currentEvent.getStateMachineId();
 		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
 		try {
-			sleep(200);
+			sleep(100);
 		} catch (InterruptedException e) {
 			System.out.println("WRONGLY TIMED INTERRUPT!");
 		}

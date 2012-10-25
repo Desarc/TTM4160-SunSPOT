@@ -10,7 +10,8 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
  */
 public class EventQueue {
 
-	private Queue eventQueue;
+	private Queue externalEventQueue;
+	private Queue internalEventQueue;
 	private Queue saveQueue;
 	private String stateMachineId;
 	private int priority;
@@ -18,7 +19,8 @@ public class EventQueue {
 	/*
 	 * The next event is stored outside the Queue, for easier timestamp checking.
 	 */
-	private Event nextEvent;
+	private Event nextExternalEvent;
+	private Event nextInternalEvent;
 	private Event nextSaveEvent;
 	
 	/**
@@ -27,21 +29,35 @@ public class EventQueue {
 	 * @param priority The scheduling priority for the events in this queue. {@link int}
 	 */
 	public EventQueue(String stateMachineId, int priority) {
-		eventQueue = new Queue();
+		externalEventQueue = new Queue();
+		internalEventQueue = new Queue();
 		this.stateMachineId = stateMachineId;
 		this.priority = priority;
 	}
 	
 	/**
-	 * Adds a new event to the queue.
+	 * Adds a new external event to the queue.
 	 * @param event
 	 */
-	public void addEvent(Event event) {
-		if (nextEvent == null) {
-			nextEvent = event;
+	public void addExternalEvent(Event event) {
+		if (nextExternalEvent == null) {
+			nextExternalEvent = event;
 		}
 		else {
-			eventQueue.put(event);
+			externalEventQueue.put(event);
+		}
+	}
+	
+	/**
+	 * Adds a new internal event to the queue.
+	 * @param event
+	 */
+	public void addInternalEvent(Event event) {
+		if (nextInternalEvent == null) {
+			nextInternalEvent = event;
+		}
+		else {
+			internalEventQueue.put(event);
 		}
 	}
 	
@@ -75,13 +91,22 @@ public class EventQueue {
 				nextSaveEvent = null;
 			}
 		}
-		else if (nextEvent != null) {
-			next = nextEvent;
-			if (eventQueue.size() != 0) {
-				nextEvent = (Event)eventQueue.get();
+		else if (nextInternalEvent != null) {
+			next = nextInternalEvent;
+			if (internalEventQueue.size() != 0) {
+				nextInternalEvent = (Event)internalEventQueue.get();
 			}
 			else {
-				nextEvent = null;
+				nextInternalEvent = null;
+			}
+		}
+		else if (nextExternalEvent != null) {
+			next = nextExternalEvent;
+			if (externalEventQueue.size() != 0) {
+				nextExternalEvent = (Event)externalEventQueue.get();
+			}
+			else {
+				nextExternalEvent = null;
 			}
 		}
 		return next;
@@ -92,7 +117,8 @@ public class EventQueue {
 	 * @return False if no events.
 	 */
 	public boolean isEmpty() {
-		return (nextEvent == null && nextSaveEvent == null && eventQueue.size() == 0 && saveQueue.size() == 0);
+		return (nextExternalEvent == null && nextInternalEvent == null && nextSaveEvent == null 
+				&& externalEventQueue.size() == 0 && internalEventQueue.size() == 0 && saveQueue.size() == 0);
 	}
 	
 	public String getStateMachineId() {
@@ -108,8 +134,11 @@ public class EventQueue {
 		if (nextSaveEvent != null) {
 			return nextSaveEvent.getTimeStamp();
 		}
-		else if (nextEvent != null) {
-			return nextEvent.getTimeStamp();
+		else if (nextInternalEvent != null) {
+			return nextInternalEvent.getTimeStamp();
+		}
+		else if (nextExternalEvent != null) {
+			return nextExternalEvent.getTimeStamp();
 		}
 		return Long.MAX_VALUE;
 	}

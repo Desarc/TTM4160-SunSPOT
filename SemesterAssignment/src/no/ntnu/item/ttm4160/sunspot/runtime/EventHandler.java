@@ -64,7 +64,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
-			scheduler.addEvent(event);
+			scheduler.addInternalEvent(event);
 		}
 		else if (action.equals(button2)) {
 			disconnectAll();
@@ -75,7 +75,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		Enumeration ids = scheduler.getIDs();
 		while (ids.hasMoreElements()) {
 			Event event = generateEvent(button2, ids.nextElement().toString());
-			scheduler.addEvent(event);
+			scheduler.addInternalEvent(event);
 		}
 	}
 
@@ -100,14 +100,14 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addStateMachineThread(stateMachineThread, receiveStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
 			scheduler.addTimerHandler(handler);
-			scheduler.addEvent(event);
+			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
 				scheduler.killAllTimers(event.getStateMachineId());
-				scheduler.addEvent(event);
+				scheduler.addExternalEvent(event);
 		}
 		else {
-			scheduler.addEvent(event);
+			scheduler.addExternalEvent(event);
 		}
 	}
 	

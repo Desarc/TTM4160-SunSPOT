@@ -188,13 +188,27 @@ public class Scheduler {
 	}
 	
 	/**
-	 * Adds an event to it's proper queue, and starts event processing if no {@link StateMachine} is running.
+	 * Adds an internal event to it's proper queue, and starts event processing if no {@link StateMachine} is running.
 	 * @param event
 	 */
-	public synchronized void addEvent(Event event) {
-		System.out.println("Adding event");
+	public synchronized void addInternalEvent(Event event) {
+		System.out.println("Adding internal event");
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
-		queue.addEvent(event);
+		queue.addInternalEvent(event);
+		if (state == busy) {
+			return;
+		}
+		getNextEvent();
+	}
+	
+	/**
+	 * Adds an external event to it's proper queue, and starts event processing if no {@link StateMachine} is running.
+	 * @param event
+	 */
+	public synchronized void addExternalEvent(Event event) {
+		System.out.println("Adding external event");
+		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
+		queue.addExternalEvent(event);
 		if (state == busy) {
 			return;
 		}

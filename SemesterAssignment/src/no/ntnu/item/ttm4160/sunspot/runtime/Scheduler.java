@@ -273,6 +273,10 @@ public class Scheduler extends Thread {
 	public synchronized Enumeration getIDs() {
 		return activeStateMachines.keys();
 	}
+	
+	public synchronized Enumeration getActiveStateMachineElements(){
+		return activeStateMachines.elements();
+	}
 
 
 	public synchronized void resetTimer(String stateMachineId, String currentTimer) {

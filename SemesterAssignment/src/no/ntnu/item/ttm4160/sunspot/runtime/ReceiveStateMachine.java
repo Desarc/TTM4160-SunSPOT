@@ -59,7 +59,7 @@ public class ReceiveStateMachine extends StateMachine {
 					System.out.println("------------------------------------------");
 					System.out.println("\nConnection approved!\n");
 					System.out.println("------------------------------------------");
-					Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
+					Event giveUp = new Event(Event.receiverGiveUp, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 5000);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					state = busy;
@@ -115,7 +115,7 @@ public class ReceiveStateMachine extends StateMachine {
 				}
 				currentEvent = null;		//making sure the event is consumed
 			}
-			else if (currentEvent.getType() == Event.giveUp) {
+			else if (currentEvent.getType() == Event.receiverGiveUp) {
 				if (state == busy) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nTimeout! Assuming connection has died.\n");

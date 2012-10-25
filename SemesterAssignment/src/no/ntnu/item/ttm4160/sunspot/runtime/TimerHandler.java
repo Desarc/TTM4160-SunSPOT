@@ -21,6 +21,7 @@ public class TimerHandler extends Thread {
 	private Event nextEvent;
 	private Scheduler scheduler;
 	private int priority;
+	private EventHandler eventHandler;
 	
 	/**
 	 * 
@@ -28,9 +29,10 @@ public class TimerHandler extends Thread {
 	 * @param scheduler A reference to the {@link Scheduler} for timeout notification.
 	 * @param priority {@link int} Scheduling priority for this handler's timeout events.
 	 */
-	public TimerHandler(String stateMachineId, Scheduler scheduler, int priority) {
+	public TimerHandler(String stateMachineId, Scheduler scheduler, EventHandler eventHandler, int priority) {
 		this.stateMachineId = stateMachineId;
 		this.scheduler = scheduler;
+		this.eventHandler = eventHandler;
 		this.priority = priority;
 		activeTimers = new Hashtable();
 		timeoutEventQueue = new Queue();
@@ -60,6 +62,12 @@ public class TimerHandler extends Thread {
 	 */
 	public synchronized void timeout(SPOTTimer timer) {
 		Event timeout = timer.getEvent();
+		if (timeout.getType().equals(Event.broadcastGiveUp)) {
+			eventHandler.decreaseActiveSendConnections();
+		}
+		else if (timeout.getType().equals(Event.receiverGiveUp)) {
+			eventHandler.decreaseActiveReceiveConnections();
+		}
 		timeout.setTimeStamp(System.currentTimeMillis());
 		if (nextEvent == null) {
 			nextEvent = timeout;

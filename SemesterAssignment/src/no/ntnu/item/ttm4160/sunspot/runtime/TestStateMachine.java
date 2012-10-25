@@ -11,34 +11,46 @@ import no.ntnu.item.ttm4160.sunspot.utils.*;
  */
 public class TestStateMachine extends StateMachine {
 
-	private int state;
+	private String state;
+	private LEDColor color;
 	private String activeTimer;
+	private long speed;
+	private boolean slow;
 	
-	public static final int idle = 0;
-	public static final int on = 1;
-	public static final int off = 2;
+	public static final String idle = "idle";
+	public static final String on = "on";
+	public static final String off = "off";
 	
-	public TestStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
+	public TestStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, LEDColor color, long speed, boolean slow) {
 		super(stateMachineId, scheduler, app);
 		state = idle;
+		this.color = color;
+		this.speed = speed;
+		this.slow = slow;
 	}
 	
 	public void run() {
-		activeTimer = scheduler.addTimer(stateMachineId, 100);
+		activeTimer = scheduler.addTimer(stateMachineId, speed);
 		while (true) {
 			if (SunSpotApplication.output) {	
 				System.out.println(Thread.currentThread());
 			}
 			if (currentEvent == null) {
-				
+				if (SunSpotApplication.output) {	
+					System.out.println("No event.");
+				}
 			}
 			else if (currentEvent.getType().equals(Event.testOn) && (state == idle || state == off) ) {
 				for (int i = 0; i < app.leds.length; i++) {
-					app.leds[i].setColor(LEDColor.BLUE);
+					app.leds[i].setColor(color);
 					app.leds[i].setOn();
 				}
 				state = on;
-				scheduler.startTimer(stateMachineId, activeTimer, new Event(Event.testOff, stateMachineId, System.currentTimeMillis()));
+				Event off = new Event(Event.testOff, stateMachineId, System.currentTimeMillis());
+				scheduler.startTimer(stateMachineId, activeTimer, off);
+				long time = System.currentTimeMillis();
+				while (System.currentTimeMillis() < time+200 && slow) {}
+				currentEvent = null;
 				returnControlToScheduler(false);
 			}
 			else if (currentEvent.getType() == Event.testOff && state == on) {
@@ -46,7 +58,11 @@ public class TestStateMachine extends StateMachine {
 					app.leds[i].setOff();
 				}
 				state = off;
-				scheduler.startTimer(stateMachineId, activeTimer, new Event(Event.testOn, stateMachineId, System.currentTimeMillis()));
+				Event on = new Event(Event.testOn, stateMachineId, System.currentTimeMillis());
+				scheduler.startTimer(stateMachineId, activeTimer, on);
+				long time = System.currentTimeMillis();
+				while (System.currentTimeMillis() < time+200 && slow) {}
+				currentEvent = null;
 				returnControlToScheduler(false);
 			}
 			try {

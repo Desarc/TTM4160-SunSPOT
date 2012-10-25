@@ -50,7 +50,6 @@ public class SPOTTimer extends Thread {
 			} catch (InterruptedException e) {
 				running = true;				//if interrupted, start timer
 				while (running && active) {
-					//System.out.println(Thread.currentThread());
 					try {
 						sleep(time);		//sleep for 'time' milliseconds (timer)
 					} catch (InterruptedException e1) {
@@ -67,11 +66,11 @@ public class SPOTTimer extends Thread {
 		handler.timeout(this);
 	}
 
-	public synchronized Event getEvent() {
+	public Event getEvent() {
 		return event;
 	}
 	
-	public synchronized void setEvent(Event event) {
+	public void setEvent(Event event) {
 		this.event = event;
 	}
 	
@@ -83,7 +82,7 @@ public class SPOTTimer extends Thread {
 		return running;
 	}
 	
-	public synchronized void deactivate() {
+	public void deactivate() {
 		active = false;
 	}
 }

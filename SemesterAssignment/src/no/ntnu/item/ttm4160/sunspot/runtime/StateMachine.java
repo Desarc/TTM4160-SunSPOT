@@ -11,7 +11,7 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
 public abstract class StateMachine extends Thread {
 	
 	protected String stateMachineId;
-	protected int state;
+	protected String state;
 	protected Scheduler scheduler;
 	protected SunSpotApplication app;
 	protected Event currentEvent;

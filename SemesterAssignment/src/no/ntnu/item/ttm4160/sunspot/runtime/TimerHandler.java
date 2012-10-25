@@ -45,15 +45,11 @@ public class TimerHandler extends Thread {
 	 * @param time {@link long}
 	 * @param event {@link Event}
 	 */
-	public synchronized String startNewTimer(long time) {
+	public synchronized String addNewTimer(long time) {
 		SPOTTimer timer = new SPOTTimer(time, this);
 		activeTimers.put(timer.getTimerId(), timer);
 		Thread timerThread = timer.startThread();
 		activeTimerThreads.put(timer.getTimerId(), timerThread);
-		if (SunSpotApplication.output) {	
-			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
-		}
-		timerThread.interrupt();
 		return timer.getTimerId();
 	}
 	
@@ -64,6 +60,10 @@ public class TimerHandler extends Thread {
 	 * @param timer
 	 */
 	public synchronized void timeout(SPOTTimer timer) {
+//		if (timer.getEvent() == null) {
+//			System.out.println("No event.");
+//			return;
+//		}
 		Event timeout = timer.getEvent();
 		if (timeout.getType().equals(Event.broadcastGiveUp)) {
 			eventHandler.decreaseActiveSendConnections();

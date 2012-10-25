@@ -13,13 +13,14 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
  */
 public class SendingStateMachine extends StateMachine {
 
-	public static final int ready = 0;
-	public static final int wait_response = 1;
-	public static final int sending = 2;
+	public static final String ready = "ready";
+	public static final String wait_response = "wait_response";
+	public static final String sending = "sending";
 	
 	
 	private int readings;
 	private String receiver;
+	private String giveUpTimer;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -69,7 +70,10 @@ public class SendingStateMachine extends StateMachine {
 					}
 					receiver = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
+					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 100);
+					giveUpTimer = scheduler.addTimer(stateMachineId, 5000);
+					scheduler.startTimer(stateMachineId, giveUpTimer, giveUp);
 					scheduler.startTimer(stateMachineId, currentTimer, timeout);
 					sendApproved();
 					state = sending;
@@ -95,6 +99,7 @@ public class SendingStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					scheduler.resetTimer(stateMachineId, currentTimer);
+					scheduler.resetTimer(stateMachineId, giveUpTimer);
 					sendReadings();
 					state = sending;
 					returnControlToScheduler(false);

@@ -12,9 +12,9 @@ import no.ntnu.item.ttm4160.sunspot.utils.Event;
  */
 public class ReceiveStateMachine extends StateMachine {
 	
-	public static final int free = 0;
-	public static final int busy = 1;
-	public static final int wait_approved = 2;
+	public static final String free = "free";
+	public static final String busy = "busy";
+	public static final String wait_approved = "wait_approved";
 	
 	private String sender;
 	

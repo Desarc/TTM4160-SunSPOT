@@ -21,6 +21,10 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	private Scheduler scheduler;
 	private SunSpotApplication app;
 	private ISwitch sw1, sw2;
+	private int maxReceiveConnections = 1;
+	private int maxSendConnections = 2;
+	private int activeReceiveConnections;
+	private int activeSendConnections;
 	
 	public static final String button1 = "button1";
 	public static final String button2 = "button2";
@@ -37,6 +41,8 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	     sw2 = EDemoBoard.getInstance().getSwitches()[1];
 	     sw1.addISwitchListener(this);
 	     sw2.addISwitchListener(this);
+	     activeSendConnections = 0;
+	     activeReceiveConnections = 0;
 	}
 
 	/**
@@ -44,6 +50,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 * and passes the event to the {@link Scheduler}. Creates a new {@link StateMachine} if applicable.
 	 */
 	public void actionReceived(String action) {
+		System.out.println("Button pressed.");
 		if (action.equals(button1)) {
 //			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app);
 //			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
@@ -55,11 +62,17 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 //			scheduler.addEventQueue(eventQueue);
 //			scheduler.addTimerHandler(handler);
 //			scheduler.addEvent(event);
+			if (activeSendConnections >= maxSendConnections) {
+				System.out.println("Too many connections, skipping broadcast.");
+				return;
+			}
 			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
 			Event event = generateEvent(action, sendingStateMachine.getId());
 			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = sendingStateMachine.startThread();
+			activeSendConnections++;
+			System.out.println("Number of active send connections: "+activeSendConnections);
 			scheduler.addStateMachine(sendingStateMachine);
 			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
@@ -72,6 +85,8 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	}
 
 	private void disconnectAll() {
+		activeReceiveConnections = 0;
+		activeSendConnections = 0;
 		Enumeration ids = scheduler.getIDs();
 		while (ids.hasMoreElements()) {
 			Event event = generateEvent(button2, ids.nextElement().toString());
@@ -85,17 +100,27 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 * @param message
 	 */
 	public synchronized void inputReceived(Message message) {
-		System.out.println("Input received");
+		System.out.println("Input received.");
 		Event event = generateEvent(message);
 		if (!scheduler.checkIfActive(event.getStateMachineId()) && !message.getContent().equals(Message.CanYouDisplayMyReadings)) {
 			System.out.println("Event received for inactive state machine, discarding.");
 		}
 		else if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
-			System.out.println("Broadcast received by event handler");
+			System.out.println("Broadcast received by event handler.");
+			if (scheduler.checkIfActive(message.getSender())) {
+				System.out.println("Already communication with this SPOT, discarding broadcast.");
+				return;
+			}
+			if (activeReceiveConnections >= maxReceiveConnections) {
+				System.out.println("Too many connections, discarding broadcast.");
+				return;
+			}
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = receiveStateMachine.startThread();
+			activeReceiveConnections++;
+			System.out.println("Number of active receive connections: "+activeReceiveConnections);
 			scheduler.addStateMachine(receiveStateMachine);
 			scheduler.addStateMachineThread(stateMachineThread, receiveStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
@@ -143,12 +168,15 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			return new Event(Event.connectionApproved, message.getReceiverId(), message.getReceiver(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Denied)) {
-			return new Event(Event.connectionDenied, message.getReceiverId(), message.getSender(), System.currentTimeMillis());
+			decreaseActiveReceiveConnections();
+			return new Event(Event.connectionDenied, message.getReceiverId(), message.getReceiver(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
+			decreaseActiveSendConnections();
 			return new Event(Event.receiverDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
+			decreaseActiveReceiveConnections();
 			return new Event(Event.senderDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().indexOf(Message.Reading) != -1) {
@@ -172,6 +200,16 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 
 	public void switchReleased(ISwitch sw) {
 		
+	}
+	
+	public void decreaseActiveSendConnections() {
+		activeSendConnections--;
+		System.out.println("Number of active send connections: "+activeSendConnections);
+	}
+	
+	public void decreaseActiveReceiveConnections() {
+		activeReceiveConnections--;
+		System.out.println("Number of active receive connections: "+activeReceiveConnections);
 	}
 
 

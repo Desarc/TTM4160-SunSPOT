@@ -80,6 +80,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addInternalEvent(event);
 		}
 		else if (action.equals(button2)) {
+			System.out.println("number of active statemachines "+scheduler.getActiveStateMachineConnections());
 			disconnectAll();
 		}
 	}

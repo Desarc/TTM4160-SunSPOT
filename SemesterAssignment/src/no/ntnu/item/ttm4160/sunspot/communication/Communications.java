@@ -133,6 +133,10 @@ public class Communications implements ICommunicationLayer{
     	remoteAddressBook.put(connectionAddress, rConn);
     }
     
+    public Hashtable getRemoteAddressBook (){
+    	return remoteAddressBook;
+    }
+    
     
     private class RadiogramListener implements Runnable{
 

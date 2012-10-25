@@ -46,7 +46,7 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("\nBroadcasting request...\n");
 					System.out.println("------------------------------------------");
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 500);
+					currentTimer = scheduler.addTimer(stateMachineId, 1000);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					sendBroadcast();
 					state = wait_response;

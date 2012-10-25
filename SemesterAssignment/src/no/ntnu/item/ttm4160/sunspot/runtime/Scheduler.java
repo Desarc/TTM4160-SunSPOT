@@ -235,6 +235,18 @@ public class Scheduler {
 	public synchronized Enumeration getActiveStateMachineElements(){
 		return activeStateMachines.elements();
 	}
+	
+	public synchronized int getActiveStateMachineConnections(){
+		Enumeration elements = activeStateMachines.elements();
+		int size = 0;
+		while (elements.hasMoreElements()) {
+			StateMachine sm = (StateMachine) elements.nextElement();
+			Hashtable connections = sm.app.com.getRemoteAddressBook();
+			size = connections.size();
+			break;
+		}
+		return size;
+	}
 
 
 	public synchronized void resetTimer(String stateMachineId, String currentTimer) {

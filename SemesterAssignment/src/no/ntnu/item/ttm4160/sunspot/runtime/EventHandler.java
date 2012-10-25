@@ -63,7 +63,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 //			scheduler.addTimerHandler(handler);
 //			scheduler.addEvent(event);
 			if (activeSendConnections >= maxSendConnections) {
-				System.out.println("Too many connections, skipping broadcast.");
+				if (SunSpotApplication.output) {
+					System.out.println("Too many connections, skipping broadcast.");
+				}
 				return;
 			}
 			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
@@ -72,7 +74,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, this, sendingStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = sendingStateMachine.startThread();
 			activeSendConnections++;
-			System.out.println("Number of active send connections: "+activeSendConnections);
+			if (SunSpotApplication.output) {
+				System.out.println("Number of active send connections: "+activeSendConnections);
+			}
 			scheduler.addStateMachine(sendingStateMachine);
 			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
@@ -80,7 +84,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addInternalEvent(event);
 		}
 		else if (action.equals(button2)) {
-			System.out.println("number of active statemachines "+scheduler.getActiveStateMachineConnections());
+			if (SunSpotApplication.output) {
+				System.out.println("number of active statemachines "+scheduler.getActiveStateMachineConnections());
+			}
 			disconnectAll();
 		}
 	}
@@ -101,19 +107,29 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	 * @param message
 	 */
 	public synchronized void inputReceived(Message message) {
-		System.out.println("Input received.");
+		if (SunSpotApplication.output) {
+			System.out.println("Input received.");
+		}
 		Event event = generateEvent(message);
 		if (!scheduler.checkIfActive(event.getStateMachineId()) && !message.getContent().equals(Message.CanYouDisplayMyReadings)) {
-			System.out.println("Event received for inactive state machine, discarding.");
+			if (SunSpotApplication.output) {
+				System.out.println("Event received for inactive state machine, discarding.");
+			}
 		}
 		else if (message.getContent().equals(Message.CanYouDisplayMyReadings)) {
-			System.out.println("Broadcast received by event handler.");
+			if (SunSpotApplication.output) {
+				System.out.println("Broadcast received by event handler.");				
+			}
 			if (scheduler.checkIfActive(message.getSender())) {
-				System.out.println("Already communication with this SPOT, discarding broadcast.");
+				if (SunSpotApplication.output) {					
+					System.out.println("Already communication with this SPOT, discarding broadcast.");
+				}
 				return;
 			}
 			if (activeReceiveConnections >= maxReceiveConnections) {
-				System.out.println("Too many connections, discarding broadcast.");
+				if (SunSpotApplication.output) {	
+					System.out.println("Too many connections, discarding broadcast.");
+				}
 				return;
 			}
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
@@ -121,7 +137,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, this, receiveStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = receiveStateMachine.startThread();
 			activeReceiveConnections++;
-			System.out.println("Number of active receive connections: "+activeReceiveConnections);
+			if (SunSpotApplication.output) {	
+				System.out.println("Number of active receive connections: "+activeReceiveConnections);
+			}
 			scheduler.addStateMachine(receiveStateMachine);
 			scheduler.addStateMachineThread(stateMachineThread, receiveStateMachine.getId());
 			scheduler.addEventQueue(eventQueue);
@@ -205,12 +223,17 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	
 	public synchronized void decreaseActiveSendConnections() {
 		activeSendConnections--;
-		System.out.println("Number of active send connections: "+activeSendConnections);
+		
+		if (SunSpotApplication.output) {	
+			System.out.println("Number of active send connections: "+activeSendConnections);
+		}
 	}
 	
 	public synchronized void decreaseActiveReceiveConnections() {
 		activeReceiveConnections--;
-		System.out.println("Number of active receive connections: "+activeReceiveConnections);
+		if (SunSpotApplication.output) {	
+			System.out.println("Number of active receive connections: "+activeReceiveConnections);
+		}
 	}
 
 

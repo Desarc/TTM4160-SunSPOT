@@ -41,10 +41,14 @@ public class Scheduler extends Thread {
 	public void run() {
 		while (true) {
 			try {
-				System.out.println("Scheduler going to sleep...");
+				if (SunSpotApplication.output) {
+					System.out.println("Scheduler going to sleep...");
+				}
 				sleep(Inf);
 			} catch (InterruptedException e) {
-				System.out.println("Scheduler thread: "+Thread.currentThread());
+				if (SunSpotApplication.output) {
+					System.out.println("Scheduler thread: "+Thread.currentThread());
+				}
 				getNextEvent();
 			}
 		}
@@ -56,7 +60,9 @@ public class Scheduler extends Thread {
 	 * @param stateMachineId
 	 */
 	public synchronized void saveEvent(Event event, String stateMachineId) {
-		System.out.println("Event saved");
+		if (SunSpotApplication.output) {
+			System.out.println("Event saved");
+		}
 		EventQueue queue = (EventQueue)eventQueues.get(stateMachineId);
 		queue.saveEvent(event);
 		
@@ -67,11 +73,15 @@ public class Scheduler extends Thread {
 	 * no {@link StateMachine}s are running.
 	 */
 	public synchronized void timerNotify() {
-		System.out.println("Scheduler notified of timeout");
+		if (SunSpotApplication.output) {
+			System.out.println("Scheduler notified of timeout");
+		}
 		if (state == busy) {
 			return;
 		}
-		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		if (SunSpotApplication.output) {
+			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		}
 		interrupt();
 		//getNextEvent();
 	}
@@ -87,7 +97,9 @@ public class Scheduler extends Thread {
 	 * scheduler.
 	 */
 	private synchronized void getNextEvent() {
-		System.out.println("Getting next event, state: "+state);
+		if (SunSpotApplication.output) {
+			System.out.println("Getting next event, state: "+state);
+		}
 		state = busy;
 		EventQueue currentQueue = null;
 		TimerHandler currentHandler = null;
@@ -104,12 +116,16 @@ public class Scheduler extends Thread {
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
-			System.out.println("Next event is internal event.");
+			if (SunSpotApplication.output) {
+				System.out.println("Next event is internal event.");
+			}
 			currentEvent = currentQueue.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			if (SunSpotApplication.output) {
+				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			}
 			currentThread.interrupt();
 			return;
 		}
@@ -125,12 +141,16 @@ public class Scheduler extends Thread {
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
-			System.out.println("Next event is timeout");
+			if (SunSpotApplication.output) {
+				System.out.println("Next event is timeout");
+			}
 			currentEvent = currentHandler.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			if (SunSpotApplication.output) {
+				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			}
 			currentThread.interrupt();
 			return;
 		}
@@ -145,17 +165,23 @@ public class Scheduler extends Thread {
 			}
 		}
 		if (nextTime < Long.MAX_VALUE) {
-			System.out.println("Next event is external event");
+			if (SunSpotApplication.output) {
+				System.out.println("Next event is external event");
+			}
 			currentEvent = currentQueue.getNextEvent();
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			if (SunSpotApplication.output) {
+				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
+			}
 			currentThread.interrupt();
 			return;
 		}
 		//no events in any queue
-		System.out.println("No event");
+		if (SunSpotApplication.output) {
+			System.out.println("No event");
+		}
 		state = idle;
 		return;
 	}
@@ -168,13 +194,11 @@ public class Scheduler extends Thread {
 	 * @return 
 	 */
 	public synchronized String addTimer(String stateMachineId, long time) {
-		System.out.println("New timer added");
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		return handler.startNewTimer(time);
 	}
 	
 	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
-		System.out.println("Timer started");
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.startTimer(timerId, event);
 	}
@@ -187,11 +211,15 @@ public class Scheduler extends Thread {
 	 * @param stateMachineId
 	 */
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
-		System.out.println("Control returned to scheduler");
+		if (SunSpotApplication.output) {
+			System.out.println("Control returned to scheduler");
+		}
 		if (terminate) {
 			terminateStateMachine(stateMachineId);
 		}
-		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		if (SunSpotApplication.output) {
+			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		}
 		interrupt();
 		//getNextEvent();
 	}
@@ -206,22 +234,22 @@ public class Scheduler extends Thread {
 	}
 
 	public synchronized void addStateMachine(StateMachine stateMachine) {
-		System.out.println("Adding state machine "+stateMachine.getId());
+		//System.out.println("Adding state machine "+stateMachine.getId());
 		activeStateMachines.put(stateMachine.getId(), stateMachine);
 	}
 	
 	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
-		System.out.println("Adding state machine thread "+stateMachineId);
+		//System.out.println("Adding state machine thread "+stateMachineId);
 		activeThreads.put(stateMachineId, stateMachineThread);
 	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
-		System.out.println("Adding event queue "+eventQueue.getId());
+		//System.out.println("Adding event queue "+eventQueue.getId());
 		eventQueues.put(eventQueue.getId(), eventQueue);
 	}
 
 	public synchronized void addTimerHandler(TimerHandler handler) {
-		System.out.println("Adding timer handler "+handler.getId());
+		//System.out.println("Adding timer handler "+handler.getId());
 		timerHandlers.put(handler.getId(), handler);		
 	}
 	
@@ -230,13 +258,17 @@ public class Scheduler extends Thread {
 	 * @param event
 	 */
 	public synchronized void addInternalEvent(Event event) {
-		System.out.println("Adding internal event");
+		if (SunSpotApplication.output) {
+			System.out.println("Adding internal event");
+		}
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
 		queue.addInternalEvent(event);
 		if (state == busy) {
 			return;
 		}
-		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		if (SunSpotApplication.output) {
+			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		}
 		interrupt();
 		//getNextEvent();
 	}
@@ -246,25 +278,33 @@ public class Scheduler extends Thread {
 	 * @param event
 	 */
 	public synchronized void addExternalEvent(Event event) {
-		System.out.println("Adding external event");
+		if (SunSpotApplication.output) {
+			System.out.println("Adding external event");
+		}
 		EventQueue queue = (EventQueue)eventQueues.get(event.getStateMachineId());
 		queue.addExternalEvent(event);
 		if (state == busy) {
 			return;
 		}
-		System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		if (SunSpotApplication.output) {
+			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
+		}
 		interrupt();
 		//getNextEvent();
 	}
 	
 	public synchronized void killAllTimers(String stateMachineId) {
-		System.out.println("Killing timers for "+stateMachineId);
+		if (SunSpotApplication.output) {
+			System.out.println("Killing timers for "+stateMachineId);
+		}
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.killAllTimers();
 	}
 	
 	public synchronized void killTimer(String stateMachineId, String timerId) {
-		System.out.println("Killing timers for "+stateMachineId);
+		if (SunSpotApplication.output) {
+			System.out.println("Killing timer "+timerId);
+		}
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.killTimer(timerId);
 	}
@@ -292,7 +332,9 @@ public class Scheduler extends Thread {
 
 
 	public synchronized void resetTimer(String stateMachineId, String currentTimer) {
-		System.out.println("Resetting timer");
+		if (SunSpotApplication.output) {
+			System.out.println("Resetting timer");
+		}
 		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
 	}
 	

@@ -3,6 +3,7 @@ package no.ntnu.item.ttm4160.sunspot.runtime;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import no.ntnu.item.ttm4160.sunspot.SunSpotApplication;
 import no.ntnu.item.ttm4160.sunspot.utils.Event;
 import no.ntnu.item.ttm4160.sunspot.utils.SPOTTimer;
 
@@ -49,7 +50,9 @@ public class TimerHandler extends Thread {
 		activeTimers.put(timer.getTimerId(), timer);
 		Thread timerThread = timer.startThread();
 		activeTimerThreads.put(timer.getTimerId(), timerThread);
-		System.out.println("TIMERHANDLER INTERRUPTING THREAD "+timerThread);
+		if (SunSpotApplication.output) {	
+			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
+		}
 		timerThread.interrupt();
 		return timer.getTimerId();
 	}
@@ -80,7 +83,9 @@ public class TimerHandler extends Thread {
 	
 	public void resetTimer(String timerId) {
 		Thread timerThread = (Thread)activeTimerThreads.get(timerId);
-		System.out.println("TIMERHANDLER INTERRUPTING THREAD "+timerThread);
+		if (SunSpotApplication.output) {	
+			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
+		}
 		timerThread.interrupt();
 	}
 	
@@ -89,7 +94,9 @@ public class TimerHandler extends Thread {
 		if (!timer.isRunning()) {
 			timer.setEvent(event);
 			Thread timerThread = (Thread)activeTimerThreads.get(timerId);
-			System.out.println("TIMERHANDLER INTERRUPTING THREAD "+timerThread);
+			if (SunSpotApplication.output) {	
+				System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
+			}
 			timerThread.interrupt();
 		}
 	}
@@ -97,7 +104,9 @@ public class TimerHandler extends Thread {
 	public synchronized void killTimer(String timerId) {
 		((SPOTTimer)activeTimers.get(timerId)).deactivate();
 		activeTimers.remove(timerId);
-		System.out.println("TIMERHANDLER INTERRUPTING THREAD "+(Thread)activeTimerThreads.get(timerId));
+		if (SunSpotApplication.output) {	
+			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+(Thread)activeTimerThreads.get(timerId));
+		}
 		((Thread)activeTimerThreads.get(timerId)).interrupt();
 		activeTimerThreads.remove(timerId);
 	}

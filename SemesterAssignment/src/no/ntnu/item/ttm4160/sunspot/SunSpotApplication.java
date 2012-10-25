@@ -54,9 +54,13 @@ public class SunSpotApplication extends MIDlet {
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
     public String MAC;
     public EventHandler eventHandler;
+    
+    public static final boolean output = false;
 	
     protected void startApp() throws MIDletStateChangeException {
-    	System.out.println("Main thread: "+Thread.currentThread());
+    	if (SunSpotApplication.output) {	
+    		System.out.println("Main thread: "+Thread.currentThread());
+		}
         new BootloaderListener().start();   // monitor the USB (if connected) and recognize commands from host
         // So you don't have to reset SPOT to deploy new code on it.
 
@@ -87,7 +91,9 @@ public class SunSpotApplication extends MIDlet {
     }
     
     public void blinkLEDsDynamic(LEDColor color, long gap1, long gap2, int blinks){
-    	System.out.println("Blinking LEDS!");
+    	if (SunSpotApplication.output) {	
+    		System.out.println("Blinking LEDS!");
+		}
     	for(int i = 0; i < leds.length; i++) {
     		leds[i].setColor(color);
     	}

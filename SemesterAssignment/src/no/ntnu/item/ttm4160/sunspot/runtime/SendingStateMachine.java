@@ -34,17 +34,23 @@ public class SendingStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
-			System.out.println("Sending thread: "+Thread.currentThread());
+			if (SunSpotApplication.output) {	
+				System.out.println("Sending thread: "+Thread.currentThread());
+			}
 			if (currentEvent == null) {
-				System.out.println("Sending state machine interrupted without event");
+				if (SunSpotApplication.output) {	
+					System.out.println("Sending state machine interrupted without event");
+				}
 				returnControlToScheduler(false);
 			}
 			else if (currentEvent.getType() == Event.broadcast) {
 				
 				if (state == ready) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nBroadcasting request...\n");
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nBroadcasting request...\n");
+						System.out.println("------------------------------------------");
+					}
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 1000);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
@@ -55,10 +61,12 @@ public class SendingStateMachine extends StateMachine {
 			}
 			else if (currentEvent.getType() == Event.broadcast_response) {
 				if (state == wait_response) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nReceived broadcast response, approving...\n");
-					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nReceived broadcast response, approving...\n");
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("------------------------------------------");
+					}
 					receiver = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 100);
@@ -68,9 +76,11 @@ public class SendingStateMachine extends StateMachine {
 					returnControlToScheduler(false);
 				}
 				else {
-					System.out.println("------------------------------------------");
-					System.out.println("\nReceived broadcast response in wrong context, denying...\n");
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nReceived broadcast response in wrong context, denying...\n");
+						System.out.println("------------------------------------------");
+					}
 					sendDenied();
 					returnControlToScheduler(false);
 				}
@@ -78,10 +88,12 @@ public class SendingStateMachine extends StateMachine {
 			else if (currentEvent.getType() == Event.sendReadings) {
 				
 				if (state == sending) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nSending light readings...\n");
-					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nSending light readings...\n");
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("------------------------------------------");
+					}
 					scheduler.resetTimer(stateMachineId, currentTimer);
 					sendReadings();
 					state = sending;
@@ -90,9 +102,11 @@ public class SendingStateMachine extends StateMachine {
 			}
 			else if (currentEvent.getType() == Event.broadcastGiveUp) {
 				if (state == wait_response) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nNo responses received, giving up.\n");
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nNo responses received, giving up.\n");
+						System.out.println("------------------------------------------");
+					}
 					blinkLEDs();
 					state = ready;
 					returnControlToScheduler(true);
@@ -101,10 +115,12 @@ public class SendingStateMachine extends StateMachine {
 			else if (currentEvent.getType() == Event.disconnect) {
 				
 				if (state == sending) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nDisconnecting...\n");
-					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nDisconnecting...\n");
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("------------------------------------------");
+					}
 					sendDisconnect();
 					blinkLEDs();
 					state = ready;
@@ -114,10 +130,12 @@ public class SendingStateMachine extends StateMachine {
 			else if (currentEvent.getType() == Event.receiverDisconnect) {
 				
 				if (state == sending) {
-					System.out.println("------------------------------------------");
-					System.out.println("\nReceiver disconnected.\n");
-					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
-					System.out.println("------------------------------------------");
+					if (SunSpotApplication.output) {	
+						System.out.println("------------------------------------------");
+						System.out.println("\nReceiver disconnected.\n");
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("------------------------------------------");
+					}
 					blinkLEDs();
 					state = ready;
 					returnControlToScheduler(true);
@@ -129,10 +147,14 @@ public class SendingStateMachine extends StateMachine {
 			currentEvent = null;		//making sure the event is consumed
 			if (active) {
 				try {
-					System.out.println("Sending state machine going to sleep...");
+					if (SunSpotApplication.output) {	
+						System.out.println("Sending state machine going to sleep...");
+					}
 					sleep(Inf);
 				} catch (InterruptedException e) {	
-					System.out.println("Sending state machine interrupted");
+					if (SunSpotApplication.output) {	
+						System.out.println("Sending state machine interrupted");
+					}
 				}
 			}
 		}
@@ -172,7 +194,9 @@ public class SendingStateMachine extends StateMachine {
 		try {
 			readings = app.lightSensor.getAverageValue();
 		} catch (IOException e) {
-			System.out.println("Failed to read from box");
+			if (SunSpotApplication.output) {	
+				System.out.println("Failed to read from box");
+			}
 			e.printStackTrace();
 		}
 		return Integer.toString(readings);

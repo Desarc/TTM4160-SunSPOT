@@ -24,7 +24,8 @@ public class Event {
 	public static final String disconnect = "disconnect";
 	public static final String receiverDisconnect = "receiver disconnected";
 	public static final String senderDisconnect = "sender disconnected";
-	public static final String giveUp = "give up";
+	public static final String broadcastGiveUp = "give up broadcast";
+	public static final String receiverGiveUp = "give up receiving";
 	
 	
 	public static final String testOn = "On";

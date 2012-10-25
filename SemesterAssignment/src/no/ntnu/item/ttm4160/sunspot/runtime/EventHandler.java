@@ -69,7 +69,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(sendingStateMachine.getId(), sendingStateMachine.getStateMachinePriority());
 			Event event = generateEvent(action, sendingStateMachine.getId());
-			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, sendingStateMachine.getStateMachinePriority());
+			TimerHandler handler = new TimerHandler(sendingStateMachine.getId(), scheduler, this, sendingStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = sendingStateMachine.startThread();
 			activeSendConnections++;
 			System.out.println("Number of active send connections: "+activeSendConnections);
@@ -117,7 +117,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			}
 			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
 			EventQueue eventQueue = new EventQueue(receiveStateMachine.getId(), receiveStateMachine.getStateMachinePriority());
-			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, receiveStateMachine.getStateMachinePriority());
+			TimerHandler handler = new TimerHandler(receiveStateMachine.getId(), scheduler, this, receiveStateMachine.getStateMachinePriority());
 			Thread stateMachineThread = receiveStateMachine.startThread();
 			activeReceiveConnections++;
 			System.out.println("Number of active receive connections: "+activeReceiveConnections);
@@ -202,12 +202,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		
 	}
 	
-	public void decreaseActiveSendConnections() {
+	public synchronized void decreaseActiveSendConnections() {
 		activeSendConnections--;
 		System.out.println("Number of active send connections: "+activeSendConnections);
 	}
 	
-	public void decreaseActiveReceiveConnections() {
+	public synchronized void decreaseActiveReceiveConnections() {
 		activeReceiveConnections--;
 		System.out.println("Number of active receive connections: "+activeReceiveConnections);
 	}

@@ -45,8 +45,8 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("------------------------------------------");
 					System.out.println("\nBroadcasting request...\n");
 					System.out.println("------------------------------------------");
-					Event giveUp = new Event(Event.giveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 1000);
+					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
+					currentTimer = scheduler.addTimer(stateMachineId, 500);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					sendBroadcast();
 					state = wait_response;
@@ -59,7 +59,7 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("\nReceived broadcast response, approving...\n");
 					System.out.println("------------------------------------------");
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 400);
+					currentTimer = scheduler.addTimer(stateMachineId, 100);
 					scheduler.startTimer(stateMachineId, currentTimer, timeout);
 					sendApproved();
 					state = sending;
@@ -85,7 +85,7 @@ public class SendingStateMachine extends StateMachine {
 					returnControlToScheduler(false);
 				}
 			}
-			else if (currentEvent.getType() == Event.giveUp) {
+			else if (currentEvent.getType() == Event.broadcastGiveUp) {
 				
 				if (state == wait_response) {
 					System.out.println("------------------------------------------");

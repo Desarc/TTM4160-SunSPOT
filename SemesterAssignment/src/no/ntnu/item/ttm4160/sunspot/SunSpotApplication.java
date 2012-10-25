@@ -61,6 +61,7 @@ public class SunSpotApplication extends MIDlet {
         // So you don't have to reset SPOT to deploy new code on it.
 
         scheduler = new Scheduler();
+        scheduler.start();
         eventHandler = new EventHandler(scheduler, this);
         MAC = new IEEEAddress(Spot.getInstance().getRadioPolicyManager().getIEEEAddress()).asDottedHex();
         com = new Communications(MAC);

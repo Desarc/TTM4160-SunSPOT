@@ -130,12 +130,21 @@ public class EventQueue {
 	 * or Long.MAX_VALUE if there are no events.
 	 * @return {@link long}
 	 */
-	public long checkTimeStamps() {
+	public long checkInternalTimeStamps() {
+		if (nextInternalEvent != null) {
+			return nextInternalEvent.getTimeStamp();
+		}
+		return Long.MAX_VALUE;
+	}
+	
+	/**
+	 * Returns the timestamp of the next event to be processed by the corresponding {@link StateMachine},
+	 * or Long.MAX_VALUE if there are no events.
+	 * @return {@link long}
+	 */
+	public long checkExternalTimeStamps() {
 		if (nextSaveEvent != null) {
 			return nextSaveEvent.getTimeStamp();
-		}
-		else if (nextInternalEvent != null) {
-			return nextInternalEvent.getTimeStamp();
 		}
 		else if (nextExternalEvent != null) {
 			return nextExternalEvent.getTimeStamp();

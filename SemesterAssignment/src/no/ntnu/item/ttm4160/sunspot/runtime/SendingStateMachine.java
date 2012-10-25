@@ -34,7 +34,7 @@ public class SendingStateMachine extends StateMachine {
 	
 	public void run() {
 		while (active) {
-			System.out.println("sending thread: "+Thread.currentThread());
+			System.out.println("Sending thread: "+Thread.currentThread());
 			if (currentEvent == null) {
 				System.out.println("Sending state machine interrupted without event");
 				returnControlToScheduler(false);
@@ -46,7 +46,7 @@ public class SendingStateMachine extends StateMachine {
 					System.out.println("\nBroadcasting request...\n");
 					System.out.println("------------------------------------------");
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 500);
+					currentTimer = scheduler.addTimer(stateMachineId, 1000);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					sendBroadcast();
 					state = wait_response;
@@ -57,7 +57,9 @@ public class SendingStateMachine extends StateMachine {
 				if (state == wait_response) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nReceived broadcast response, approving...\n");
+					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
 					System.out.println("------------------------------------------");
+					receiver = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
 					currentTimer = scheduler.addTimer(stateMachineId, 100);
 					scheduler.startTimer(stateMachineId, currentTimer, timeout);
@@ -78,6 +80,7 @@ public class SendingStateMachine extends StateMachine {
 				if (state == sending) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nSending light readings...\n");
+					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
 					System.out.println("------------------------------------------");
 					scheduler.resetTimer(stateMachineId, currentTimer);
 					sendReadings();
@@ -86,7 +89,6 @@ public class SendingStateMachine extends StateMachine {
 				}
 			}
 			else if (currentEvent.getType() == Event.broadcastGiveUp) {
-				
 				if (state == wait_response) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nNo responses received, giving up.\n");
@@ -101,6 +103,7 @@ public class SendingStateMachine extends StateMachine {
 				if (state == sending) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nDisconnecting...\n");
+					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
 					System.out.println("------------------------------------------");
 					sendDisconnect();
 					blinkLEDs();
@@ -113,6 +116,7 @@ public class SendingStateMachine extends StateMachine {
 				if (state == sending) {
 					System.out.println("------------------------------------------");
 					System.out.println("\nReceiver disconnected.\n");
+					System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
 					System.out.println("------------------------------------------");
 					blinkLEDs();
 					state = ready;
@@ -125,6 +129,7 @@ public class SendingStateMachine extends StateMachine {
 			currentEvent = null;		//making sure the event is consumed
 			if (active) {
 				try {
+					System.out.println("Sending state machine going to sleep...");
 					sleep(Inf);
 				} catch (InterruptedException e) {	
 					System.out.println("Sending state machine interrupted");
@@ -134,7 +139,7 @@ public class SendingStateMachine extends StateMachine {
 	}
 	
 	private void sendDenied() {
-		Message denied = new Message(app.MAC+":"+stateMachineId, currentEvent.getData() , Message.Denied);
+		Message denied = new Message(app.MAC+":"+stateMachineId, receiver , Message.Denied);
 		app.com.sendRemoteMessage(denied);
 	}
 
@@ -144,7 +149,6 @@ public class SendingStateMachine extends StateMachine {
 	}
 
 	private void sendApproved() {
-		receiver = currentEvent.getData();
 		Message approved = new Message(app.MAC+":"+stateMachineId, receiver , Message.Approved);
 		app.com.sendRemoteMessage(approved);
 	}

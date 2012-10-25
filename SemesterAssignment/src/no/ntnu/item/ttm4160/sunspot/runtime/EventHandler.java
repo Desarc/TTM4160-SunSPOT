@@ -103,6 +103,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		}
 	}
 
+	/**
+	 * Creates a disconnect {@link Event} for each active {@link StateMachine}.
+	 */
 	private void disconnectAll() {
 		activeReceiveConnections = 0;
 		activeSendConnections = 0;
@@ -236,7 +239,6 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	
 	public synchronized void decreaseActiveSendConnections() {
 		activeSendConnections--;
-		
 		if (SunSpotApplication.output) {	
 			System.out.println("Number of active send connections: "+activeSendConnections);
 		}

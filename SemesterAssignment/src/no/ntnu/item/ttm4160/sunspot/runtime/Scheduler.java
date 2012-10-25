@@ -88,18 +88,18 @@ public class Scheduler extends Thread {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
 		interrupt();
-		//getNextEvent();
 	}
 	
 	/**
 	 * Checks all {@link EventQueue}s and {@link TimerHandler}s, and decides which {@link Event} to process next according
-	 * to priorities and timestamps. Timeout-events from {@link TimerHandler}s are always prioritized before events from
+	 * to priorities and timestamps. Internal events are always prioritized first, to avoid slow response because of accumulating
+	 * timeouts. Timeout events from {@link TimerHandler}s are always prioritized before external events from
 	 * {@link EventQueue}s (additionally, saved events are prioritized before other events). Further, events belonging to
 	 * {@link StateMachine}s with higher priority are processed first. Finally, if all other priorities are equal, events
 	 * are prioritized according to timestamps, from lowest to highest (FIFO). If an event is found, it is assigned to the
 	 * corresponding state machine. If there are no events to process, the scheduler simply waits.
-	 * Each event assigned to a state machine spawns a new {@link Thread}, which is terminated once control is returned to the
-	 * scheduler.
+	 * To avoid starvation, we check if a state machine has consumed many events in a row, and if so, temporarily decrease
+	 * its priority.
 	 */
 	private synchronized void getNextEvent() {
 		if (SunSpotApplication.output) {
@@ -236,6 +236,11 @@ public class Scheduler extends Thread {
 		return;
 	}
 	
+	/**
+	 * Checks if any {@link StateMachine} has executed many {@link Event}s in a row. (= starvation for other state machines).
+	 * Resets starvationCounter in case no other state machines have events pending.
+	 * @return
+	 */
 	private synchronized boolean checkStarvation() {
 		if (starvationCounter >= starvationLimit && activeStateMachines.size() > 1) {
 			if (SunSpotApplication.output) {
@@ -249,9 +254,8 @@ public class Scheduler extends Thread {
 
 
 	/**
-	 * Starts a new timer for a given {@link StateMachine}.
+	 * Adds a new {@link SPOTTimer} for a given {@link StateMachine}.
 	 * @param stateMachineId
-	 * @param event {@link Event} to be processed at timeout.
 	 * @param time Time before timeout. {@link long}
 	 * @return 
 	 */
@@ -260,6 +264,12 @@ public class Scheduler extends Thread {
 		return handler.addNewTimer(time);
 	}
 	
+	/**
+	 * Starts a given {@link SPOTTimer}.
+	 * @param stateMachineId
+	 * @param timerId
+	 * @param event
+	 */
 	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.startTimer(timerId, event);
@@ -283,9 +293,13 @@ public class Scheduler extends Thread {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
 		interrupt();
-		//getNextEvent();
 	}
 	
+	/**
+	 * Terminates the specified {@link StateMachine}, and any {@link Thread}s, {@link EventQueue}s, {@link SPOTTimer}s
+	 * or {@link TimerHandler}s associated with it.
+	 * @param stateMachineId
+	 */
 	private synchronized void terminateStateMachine(String stateMachineId) {
 		((StateMachine)activeStateMachines.get(stateMachineId)).deactivate();
 		activeStateMachines.remove(stateMachineId);
@@ -296,22 +310,18 @@ public class Scheduler extends Thread {
 	}
 
 	public synchronized void addStateMachine(StateMachine stateMachine) {
-		//System.out.println("Adding state machine "+stateMachine.getId());
 		activeStateMachines.put(stateMachine.getId(), stateMachine);
 	}
 	
 	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
-		//System.out.println("Adding state machine thread "+stateMachineId);
 		activeThreads.put(stateMachineId, stateMachineThread);
 	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
-		//System.out.println("Adding event queue "+eventQueue.getId());
 		eventQueues.put(eventQueue.getId(), eventQueue);
 	}
 
 	public synchronized void addTimerHandler(TimerHandler handler) {
-		//System.out.println("Adding timer handler "+handler.getId());
 		timerHandlers.put(handler.getId(), handler);		
 	}
 	
@@ -332,7 +342,6 @@ public class Scheduler extends Thread {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
 		interrupt();
-		//getNextEvent();
 	}
 	
 	/**
@@ -352,9 +361,12 @@ public class Scheduler extends Thread {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
 		interrupt();
-		//getNextEvent();
 	}
 	
+	/**
+	 * Kills all {@link SPOTTimer}s for a given {@link StateMachine}.
+	 * @param stateMachineId
+	 */
 	public synchronized void killAllTimers(String stateMachineId) {
 		if (SunSpotApplication.output) {
 			System.out.println("Killing timers for "+stateMachineId);
@@ -363,6 +375,11 @@ public class Scheduler extends Thread {
 		handler.killAllTimers();
 	}
 	
+	/**
+	 * Kills a given {@link SPOTTimer}.
+	 * @param stateMachineId
+	 * @param timerId
+	 */
 	public synchronized void killTimer(String stateMachineId, String timerId) {
 		if (SunSpotApplication.output) {
 			System.out.println("Killing timer "+timerId);
@@ -392,7 +409,11 @@ public class Scheduler extends Thread {
 		return size;
 	}
 
-
+	/**
+	 * Resets a given {@link SPOTTimer}.
+	 * @param stateMachineId
+	 * @param currentTimer
+	 */
 	public synchronized void resetTimer(String stateMachineId, String currentTimer) {
 		if (SunSpotApplication.output) {
 			System.out.println("Resetting timer");
@@ -400,6 +421,11 @@ public class Scheduler extends Thread {
 		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
 	}
 	
+	/**
+	 * Checks if a given {@link StateMachine} exists, and is active.
+	 * @param stateMachineId
+	 * @return
+	 */
 	public synchronized boolean checkIfActive(String stateMachineId) {
 		StateMachine stateMachine = (StateMachine)activeStateMachines.get(stateMachineId);
 		if ( stateMachine != null) {

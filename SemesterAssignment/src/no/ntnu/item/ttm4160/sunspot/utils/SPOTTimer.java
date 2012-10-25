@@ -34,12 +34,23 @@ public class SPOTTimer extends Thread {
 		active = true;
 	}
 	
+	/**
+	 * Starts this {@link SPOTTimer}, and returns its {@link Thread} instance.
+	 * @return
+	 */
 	public Thread startThread() {
 		Thread timerThread = new Thread(this);
 		timerThread.start();
 		return timerThread;
 	}
 	
+	/**
+	 * Timer sleeps 'infinitely' by default, and starts a timed sleep if interrupted.
+	 * If the timer wakes on its own, it sends a timeout to its {@link TimerHandler}.
+	 * If the timer is interrupted while 'running' is true, it resets.
+	 * IF the timer is interrupted while 'running' is false, the timer stops and goes back
+	 * to 'infinite' sleep.
+	 */
 	public void run() {
 		while (active) {
 			if (SunSpotApplication.output) {	

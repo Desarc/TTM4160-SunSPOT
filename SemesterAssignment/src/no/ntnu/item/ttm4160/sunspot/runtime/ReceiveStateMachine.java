@@ -28,7 +28,10 @@ public class ReceiveStateMachine extends StateMachine {
 		this.state = free;
 	}
 	
-	
+	/**
+	 * Sleeps until interrupted, and handles/consumees the current {@link Event} when interrupted according to
+	 * state and event type.
+	 */
 	public void run() {
 		while (active) {
 			if (SunSpotApplication.output) {	
@@ -160,6 +163,7 @@ public class ReceiveStateMachine extends StateMachine {
 				}
 				returnControlToScheduler(false);
 			}
+			currentEvent = null;		//making sure the event is consumed
 			if (active) {
 				try {
 					sleep(Inf);
@@ -172,24 +176,36 @@ public class ReceiveStateMachine extends StateMachine {
 		}
 	}
 	
+	/**
+	 * Resets the giveUpTimer.
+	 */
 	private void resetGiveUpTimer() {
 		scheduler.resetTimer(stateMachineId, currentTimer);
 	}
 
+	/**
+	 * Sends a 'ReceiverDisconnect' message to the connected sender.
+	 */
 	private void sendDisconnect() {
 		Message disconnect = new Message(app.MAC+":"+stateMachineId, sender, Message.ReceiverDisconnect);
 		app.com.sendRemoteMessage(disconnect);
 	}
 
+	/**
+	 * Blinks LEDs to indicate a disconnect.
+	 */
 	private void blinkLEDs() {
 		app.blinkLEDsDynamic(LEDColor.RED, 200, 0, 3);
 	}
 
+	/**
+	 * Sends an 'ICanDisplayReadings' response to a broadcaster.
+	 */
 	private void sendBroadcastResponse() {
 		sender = currentEvent.getStateMachineId();
 		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
 		try {
-			sleep(100);
+			sleep(100);					//for some reason we get interrupted here, sleeping a little to avoid the application dying
 		} catch (InterruptedException e) {
 			if (SunSpotApplication.output) {	
 				System.out.println("WRONGLY TIMED INTERRUPT!");
@@ -198,6 +214,9 @@ public class ReceiveStateMachine extends StateMachine {
 		app.com.sendRemoteMessage(response);
 	}
 
+	/**
+	 * Displays a LED representation of the received light readings on this SunSPOT. 
+	 */
 	private void displayReadings() {
 		app.showLightreadings(Integer.parseInt(currentEvent.getData()));
 	}

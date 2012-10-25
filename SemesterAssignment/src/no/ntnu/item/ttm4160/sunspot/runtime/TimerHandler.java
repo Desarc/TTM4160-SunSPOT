@@ -55,7 +55,7 @@ public class TimerHandler extends Thread {
 	
 	/**
 	 * Method called by a running {@link SPOTTimer}, to signal a timeout.
-	 * Deletes the timer, updates the event timestamp, and adds the event to the processing queue.
+	 * Updates the event timestamp, and adds the event to the processing queue.
 	 * Finally, notifies the scheduler that a timeout has occurred.
 	 * @param timer
 	 */
@@ -81,6 +81,10 @@ public class TimerHandler extends Thread {
 		scheduler.timerNotify();
 	}
 	
+	/**
+	 * Resets a timer, making it start again with the same event type.
+	 * @param timerId
+	 */
 	public void resetTimer(String timerId) {
 		Thread timerThread = (Thread)activeTimerThreads.get(timerId);
 		if (SunSpotApplication.output) {	
@@ -89,6 +93,9 @@ public class TimerHandler extends Thread {
 		timerThread.interrupt();
 	}
 	
+	/**
+	 * Starts a given {@link SPOTTimer}, and provides it with an {@link Event} to forward at timeout.
+	 */
 	public void startTimer(String timerId, Event event) {
 		SPOTTimer timer = (SPOTTimer)activeTimers.get(timerId);
 		if (!timer.isRunning()) {
@@ -101,6 +108,10 @@ public class TimerHandler extends Thread {
 		}
 	}
 	
+	/**
+	 * Kills a given {@link SPOTTimer}.
+	 * @param timerId
+	 */
 	public synchronized void killTimer(String timerId) {
 		((SPOTTimer)activeTimers.get(timerId)).deactivate();
 		activeTimers.remove(timerId);
@@ -119,6 +130,7 @@ public class TimerHandler extends Thread {
 		while (keys.hasMoreElements()) {
 			killTimer((String)keys.nextElement());
 		}
+		timeoutEventQueue = new Queue();
 	}
 	
 	/**

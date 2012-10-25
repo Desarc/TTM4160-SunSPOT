@@ -32,7 +32,10 @@ public class SendingStateMachine extends StateMachine {
 		this.state = ready;
 	}
 	
-	
+	/**
+	 * Sleeps until interrupted, and handles/consumees the current {@link Event} when interrupted according to
+	 * state and event type.
+	 */
 	public void run() {
 		while (active) {
 			if (SunSpotApplication.output) {	
@@ -165,35 +168,56 @@ public class SendingStateMachine extends StateMachine {
 		}
 	}
 	
+	/**
+	 * Sends a 'Denied' message to the SunSPOT being denied a connection.
+	 */
 	private void sendDenied() {
-		Message denied = new Message(app.MAC+":"+stateMachineId, receiver , Message.Denied);
+		Message denied = new Message(app.MAC+":"+stateMachineId, currentEvent.getData(), Message.Denied);
 		app.com.sendRemoteMessage(denied);
 	}
 
+	/**
+	 * Sends a 'SenderDisconnect' message to the connected receiver.
+	 */
 	private void sendDisconnect() {
-		Message disconnect = new Message(app.MAC+":"+stateMachineId, receiver , Message.SenderDisconnect);
+		Message disconnect = new Message(app.MAC+":"+stateMachineId, receiver, Message.SenderDisconnect);
 		app.com.sendRemoteMessage(disconnect);
 	}
 
+	/**
+	 * Sends an 'Approved' message to the connected receiver.
+	 */
 	private void sendApproved() {
-		Message approved = new Message(app.MAC+":"+stateMachineId, receiver , Message.Approved);
+		Message approved = new Message(app.MAC+":"+stateMachineId, receiver, Message.Approved);
 		app.com.sendRemoteMessage(approved);
 	}
 
+	/**
+	 * Blinks LEDs to indicate a disconnect.
+	 */
 	private void blinkLEDs() {
 		app.blinkLEDsDynamic(LEDColor.RED, 200, 0, 3);
 	}
 
+	/**
+	 * Sends a broadcast request to any listening SunSPOTs.
+	 */
 	private void sendBroadcast() {
 		Message message = new Message(app.MAC+":"+stateMachineId, Message.BROADCAST_ADDRESS, Message.CanYouDisplayMyReadings);
 		app.com.sendRemoteMessage(message);
 	}
 	
+	/**
+	 * Sends a message with the current light readings.
+	 */
 	private void sendReadings() {
 		Message message = new Message(app.MAC+":"+stateMachineId, receiver, Message.Reading+registerReadings());
 		app.com.sendRemoteMessage(message);
 	}
 	
+	/**
+	 * Fetches light readings from this SunSPOT.
+	 */
 	private String registerReadings() {
 		readings = -1;
 		try {

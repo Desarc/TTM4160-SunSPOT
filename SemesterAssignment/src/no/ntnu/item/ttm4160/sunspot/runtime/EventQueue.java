@@ -76,7 +76,7 @@ public class EventQueue {
 	
 	/**
 	 * Checks if any events are waiting, and returns the next event to be processed by the {@link StateMachine}.
-	 * Saved events are always prioritized over other events.
+	 * Saved events are always prioritized over internal events, and internal events over external events.
 	 * 
 	 * @return The next {@link Event}, or {@link null} if there are no events.
 	 */
@@ -126,27 +126,27 @@ public class EventQueue {
 	}
 	
 	/**
-	 * Returns the timestamp of the next event to be processed by the corresponding {@link StateMachine},
+	 * Returns the timestamp of the next saved or internal event to be processed by the corresponding {@link StateMachine},
 	 * or Long.MAX_VALUE if there are no events.
 	 * @return {@link long}
 	 */
 	public long checkInternalTimeStamps() {
-		if (nextInternalEvent != null) {
+		if (nextSaveEvent != null) {
+			return nextSaveEvent.getTimeStamp();
+		}
+		else if (nextInternalEvent != null) {
 			return nextInternalEvent.getTimeStamp();
 		}
 		return Long.MAX_VALUE;
 	}
 	
 	/**
-	 * Returns the timestamp of the next event to be processed by the corresponding {@link StateMachine},
+	 * Returns the timestamp of the next external event to be processed by the corresponding {@link StateMachine},
 	 * or Long.MAX_VALUE if there are no events.
 	 * @return {@link long}
 	 */
 	public long checkExternalTimeStamps() {
-		if (nextSaveEvent != null) {
-			return nextSaveEvent.getTimeStamp();
-		}
-		else if (nextExternalEvent != null) {
+		if (nextExternalEvent != null) {
 			return nextExternalEvent.getTimeStamp();
 		}
 		return Long.MAX_VALUE;

@@ -21,8 +21,11 @@ public class Scheduler extends Thread {
 	private Hashtable timerHandlers;
 	private String state;
 	private int starvationCounter;
-	private int starvationLimit = 5;
 	private String previousStateMachine;
+	
+	private boolean discardOldEvents = true;
+	private int oldEventLimit = 2000;
+	private int starvationLimit = 3;
 	
 	public static final String idle = "idle"; //no events being processed by any state machine
 	public static final String busy = "busy"; //a state machine is processing an event
@@ -134,6 +137,10 @@ public class Scheduler extends Thread {
 				System.out.println("Next event is internal event.");
 			}
 			currentEvent = currentQueue.getNextEvent();
+			if (discardOldEvents && (currentEvent.getTimeStamp()+oldEventLimit) < System.currentTimeMillis()) {
+				getNextEvent();
+				return;
+			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
@@ -172,6 +179,10 @@ public class Scheduler extends Thread {
 				System.out.println("Next event is timeout");
 			}
 			currentEvent = currentHandler.getNextEvent();
+			if (discardOldEvents && (currentEvent.getTimeStamp()+oldEventLimit) < System.currentTimeMillis()) {
+				getNextEvent();
+				return;
+			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
@@ -209,6 +220,10 @@ public class Scheduler extends Thread {
 				System.out.println("Next event is external event");
 			}
 			currentEvent = currentQueue.getNextEvent();
+			if (discardOldEvents && (currentEvent.getTimeStamp()+oldEventLimit) < System.currentTimeMillis()) {
+				getNextEvent();
+				return;
+			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());

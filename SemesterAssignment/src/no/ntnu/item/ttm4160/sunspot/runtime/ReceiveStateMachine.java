@@ -92,7 +92,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					state = free;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else if (currentEvent.getType() == Event.senderDisconnect) {

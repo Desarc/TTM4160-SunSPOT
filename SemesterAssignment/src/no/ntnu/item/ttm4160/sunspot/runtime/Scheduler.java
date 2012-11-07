@@ -23,7 +23,7 @@ public class Scheduler extends Thread {
 	private int starvationCounter;
 	private String previousStateMachine;
 	
-	private boolean discardOldEvents = true;
+	private boolean discardOldEvents = false;
 	private int oldEventLimit = 2000;
 	private int starvationLimit = 3;
 	

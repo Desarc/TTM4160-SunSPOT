@@ -21,6 +21,9 @@ public class SendingStateMachine extends StateMachine {
 	private int readings;
 	private String receiver;
 	private String giveUpTimer;
+	private int freq = 200;
+	private int giveUpTime = 5000;
+	private int broadcastTime = 1000;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -56,7 +59,7 @@ public class SendingStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 1000);
+					currentTimer = scheduler.addTimer(stateMachineId, broadcastTime);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					sendBroadcast();
 					state = wait_response;
@@ -74,8 +77,8 @@ public class SendingStateMachine extends StateMachine {
 					receiver = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 100);
-					giveUpTimer = scheduler.addTimer(stateMachineId, 5000);
+					currentTimer = scheduler.addTimer(stateMachineId, freq);
+					giveUpTimer = scheduler.addTimer(stateMachineId, giveUpTime);
 					scheduler.startTimer(stateMachineId, giveUpTimer, giveUp);
 					scheduler.startTimer(stateMachineId, currentTimer, timeout);
 					sendApproved();

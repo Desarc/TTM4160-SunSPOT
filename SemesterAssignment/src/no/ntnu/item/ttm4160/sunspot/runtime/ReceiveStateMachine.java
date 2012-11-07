@@ -17,6 +17,7 @@ public class ReceiveStateMachine extends StateMachine {
 	public static final String wait_approved = "wait_approved";
 	
 	private String sender;
+	private int giveUpTime = 5000;
 	
 	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -76,7 +77,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					Event giveUp = new Event(Event.receiverGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, 5000);
+					currentTimer = scheduler.addTimer(stateMachineId, giveUpTime);
 					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
 					state = busy;
 					returnControlToScheduler(false);

@@ -21,9 +21,9 @@ public class SendingStateMachine extends StateMachine {
 	private int readings;
 	private String receiver;
 	private String giveUpTimer;
-	private int freq = 200;
-	private int giveUpTime = 5000;
-	private int broadcastTime = 1000;
+	private long freq = 200;
+	private long giveUpTime = 5000;
+	private long broadcastTime = 1000;
 	
 	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);

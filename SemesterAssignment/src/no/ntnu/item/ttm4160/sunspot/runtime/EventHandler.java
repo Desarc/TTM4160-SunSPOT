@@ -135,7 +135,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			if (SunSpotApplication.output) {
 				System.out.println("Broadcast received by event handler.");				
 			}
-			if (scheduler.checkIfActive(message.getSender())) {
+			if (scheduler.checkIfActive(message.getSender()) || scheduler.checkIfReceiver(message.getSenderMAC())) {
 				if (SunSpotApplication.output) {					
 					System.out.println("Already communication with this SPOT, discarding broadcast.");
 				}

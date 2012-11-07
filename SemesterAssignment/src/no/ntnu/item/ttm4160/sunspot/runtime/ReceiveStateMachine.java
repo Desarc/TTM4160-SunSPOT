@@ -17,7 +17,7 @@ public class ReceiveStateMachine extends StateMachine {
 	public static final String wait_approved = "wait_approved";
 	
 	private String sender;
-	private int giveUpTime = 5000;
+	private long giveUpTime = 5000;
 	
 	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
 		super(stateMachineId, scheduler, app);
@@ -92,7 +92,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					state = free;
-					returnControlToScheduler(false);
+					returnControlToScheduler(true);
 				}
 			}
 			else if (currentEvent.getType() == Event.senderDisconnect) {

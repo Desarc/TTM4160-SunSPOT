@@ -55,7 +55,7 @@ public class SunSpotApplication extends MIDlet {
     public String MAC;
     public EventHandler eventHandler;
     
-    public static final boolean output = false;
+    public static final boolean output = true;
 	
     protected void startApp() throws MIDletStateChangeException {
     	if (SunSpotApplication.output) {	

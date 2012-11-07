@@ -397,16 +397,17 @@ public class Scheduler extends Thread {
 		return activeStateMachines.elements();
 	}
 	
-	public synchronized int getActiveStateMachineConnections(){
+	public synchronized Hashtable getActiveStateMachineConnections(){
 		Enumeration elements = activeStateMachines.elements();
 		int size = 0;
+		Hashtable connections = new Hashtable();
 		while (elements.hasMoreElements()) {
 			StateMachine sm = (StateMachine) elements.nextElement();
-			Hashtable connections = sm.app.com.getRemoteAddressBook();
+			connections = sm.app.com.getRemoteAddressBook();
 			size = connections.size();
 			break;
 		}
-		return size;
+		return connections;
 	}
 
 	/**

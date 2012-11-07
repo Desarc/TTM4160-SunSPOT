@@ -434,4 +434,21 @@ public class Scheduler extends Thread {
 		return false;
 	}
 	
+	
+	/**
+	 * 
+	 */
+	public synchronized boolean checkIfReceiver(String MAC) {
+		Enumeration elements = activeStateMachines.elements();
+		while (elements.hasMoreElements()) {
+			try {
+				SendingStateMachine sm = (SendingStateMachine) elements.nextElement();
+				String smMAC = sm.getReceiver();
+				if (MAC.equals(smMAC.substring(0,smMAC.indexOf(":")))) {
+					return true;
+				}
+			} catch (ClassCastException e) {}
+		}
+		return false;
+	}
 }

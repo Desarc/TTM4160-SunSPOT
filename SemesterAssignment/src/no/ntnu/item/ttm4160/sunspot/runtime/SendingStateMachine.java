@@ -231,4 +231,8 @@ public class SendingStateMachine extends StateMachine {
 		return Integer.toString(readings);
 	}
 	
+	public String getReceiver() {
+		return receiver;
+	}
+	
 }

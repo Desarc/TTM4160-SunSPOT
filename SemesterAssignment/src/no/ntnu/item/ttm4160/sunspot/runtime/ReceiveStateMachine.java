@@ -118,6 +118,7 @@ public class ReceiveStateMachine extends StateMachine {
 					}
 					sendDisconnect();
 					blinkLEDs();
+					app.com.destroy();
 					state = free;
 					returnControlToScheduler(true);
 				}

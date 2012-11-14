@@ -87,10 +87,12 @@ public class TimerHandler extends Thread {
 	 */
 	public void resetTimer(String timerId) {
 		Thread timerThread = (Thread)activeTimerThreads.get(timerId);
-		if (SunSpotApplication.output) {	
+		if (SunSpotApplication.output) {
 			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
 		}
-		timerThread.interrupt();
+		if (timerThread != null) {
+			timerThread.interrupt();
+		}
 	}
 	
 	/**

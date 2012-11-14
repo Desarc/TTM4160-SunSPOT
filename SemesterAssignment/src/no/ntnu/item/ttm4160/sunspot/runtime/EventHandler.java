@@ -21,8 +21,8 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	private Scheduler scheduler;
 	private SunSpotApplication app;
 	private ISwitch sw1, sw2;
-	private int maxReceiveConnections = 1;
-	private int maxSendConnections = 2;
+	private int maxReceiveConnections = 5;
+	private int maxSendConnections = 5;
 	private int activeReceiveConnections;
 	private int activeSendConnections;
 	
@@ -135,12 +135,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			if (SunSpotApplication.output) {
 				System.out.println("Broadcast received by event handler.");				
 			}
-			if (scheduler.checkIfActive(message.getSender()) || scheduler.checkIfReceiver(message.getSenderMAC())) {
-				if (SunSpotApplication.output) {					
-					System.out.println("Already communication with this SPOT, discarding broadcast.");
-				}
-				return;
-			}
+//			if (scheduler.checkIfActive(message.getSender()) ) {	// || scheduler.checkIfReceiver(message.getSenderMAC())
+//				if (SunSpotApplication.output) {					
+//					System.out.println("Already communication with this SPOT, discarding broadcast.");
+//				}
+//				return;
+//			}
 			if (activeReceiveConnections >= maxReceiveConnections) {
 				if (SunSpotApplication.output) {	
 					System.out.println("Too many connections, discarding broadcast.");

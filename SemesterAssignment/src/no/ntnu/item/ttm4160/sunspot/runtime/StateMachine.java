@@ -86,7 +86,7 @@ public abstract class StateMachine extends Thread {
 		scheduler.returnControl(terminate, stateMachineId);
 	}
 	
-	public String getId() {
+	public String getStateMachineId() {
 		return stateMachineId;
 	}
 	

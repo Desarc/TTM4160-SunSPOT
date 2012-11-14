@@ -144,13 +144,13 @@ public class Scheduler extends Thread {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getId().equals(previousStateMachine)) {
+			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getId();
+			previousStateMachine = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -186,13 +186,13 @@ public class Scheduler extends Thread {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getId().equals(previousStateMachine)) {
+			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getId();
+			previousStateMachine = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -227,13 +227,13 @@ public class Scheduler extends Thread {
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
 			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getId().equals(previousStateMachine)) {
+			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getId();
+			previousStateMachine = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -307,6 +307,9 @@ public class Scheduler extends Thread {
 		if (SunSpotApplication.output) {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
+//		if (activeStateMachines.size() == 0) {
+//			app.com.destroy();
+//		}
 		interrupt();
 	}
 	
@@ -325,7 +328,7 @@ public class Scheduler extends Thread {
 	}
 
 	public synchronized void addStateMachine(StateMachine stateMachine) {
-		activeStateMachines.put(stateMachine.getId(), stateMachine);
+		activeStateMachines.put(stateMachine.getStateMachineId(), stateMachine);
 	}
 	
 	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
@@ -412,18 +415,18 @@ public class Scheduler extends Thread {
 		return activeStateMachines.elements();
 	}
 	
-	public synchronized Hashtable getActiveStateMachineConnections(){
-		Enumeration elements = activeStateMachines.elements();
-		int size = 0;
-		Hashtable connections = new Hashtable();
-		while (elements.hasMoreElements()) {
-			StateMachine sm = (StateMachine) elements.nextElement();
-			connections = sm.app.com.getRemoteAddressBook();
-			size = connections.size();
-			break;
-		}
-		return connections;
-	}
+//	public synchronized Hashtable getActiveStateMachineConnections(){
+//		Enumeration elements = activeStateMachines.elements();
+//		int size = 0;
+//		Hashtable connections = new Hashtable();
+//		while (elements.hasMoreElements()) {
+//			StateMachine sm = (StateMachine) elements.nextElement();
+//			connections = sm.app.com.getRemoteAddressBook();
+//			size = connections.size();
+//			break;
+//		}
+//		return connections;
+//	}
 
 	/**
 	 * Resets a given {@link SPOTTimer}.

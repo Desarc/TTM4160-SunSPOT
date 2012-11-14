@@ -23,6 +23,9 @@ public class Scheduler extends Thread {
 	private int starvationCounter;
 	private String previousStateMachine;
 	
+	private TimerHandler failsafeHandler;
+	private String failsafeTimer;
+	
 	private boolean discardOldEvents = false;
 	private int oldEventLimit = 2000;
 	private int starvationLimit = 3;
@@ -43,8 +46,17 @@ public class Scheduler extends Thread {
 		activeThreads = new Hashtable();
 		starvationCounter = 0;
 		previousStateMachine = "";
+		
+		failsafeHandler = new TimerHandler("scheduler", this, null, 0);
+		failsafeTimer = failsafeHandler.addNewTimer(5000);
 	}
 	
+	/**
+	 * In case of a program fail stopping the scheduler, spawn a new scheduler thread on the same instance.
+	 */
+	public void failsafeNotify() {
+		this.run();
+	}
 	
 	public void run() {
 		while (true) {
@@ -105,6 +117,8 @@ public class Scheduler extends Thread {
 	 * its priority.
 	 */
 	private synchronized void getNextEvent() {
+		failsafeHandler.startTimer(failsafeTimer, new Event(Event.failsafe, "scheduler", 0));
+		
 		if (SunSpotApplication.output) {
 			System.out.println("Getting next event, state: "+state);
 		}
@@ -298,6 +312,9 @@ public class Scheduler extends Thread {
 	 * @param stateMachineId
 	 */
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
+		
+		failsafeHandler.stopTimer(failsafeTimer);
+		
 		if (SunSpotApplication.output) {
 			System.out.println("Control returned to scheduler");
 		}
@@ -455,7 +472,7 @@ public class Scheduler extends Thread {
 	
 	
 	/**
-	 * 
+	 * Something goes wrong with the try/catch here...
 	 */
 	public synchronized boolean checkIfReceiver(String MAC) {
 		Enumeration elements = activeStateMachines.elements();

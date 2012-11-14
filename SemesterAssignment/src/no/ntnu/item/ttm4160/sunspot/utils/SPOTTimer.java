@@ -96,4 +96,8 @@ public class SPOTTimer extends Thread {
 	public void deactivate() {
 		active = false;
 	}
+	
+	public void stop() {
+		running = false;
+	}
 }

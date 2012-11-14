@@ -78,7 +78,12 @@ public class TimerHandler extends Thread {
 		else {
 			timeoutEventQueue.put(timeout);
 		}
-		scheduler.timerNotify();
+		if (timeout.getType().equals(Event.failsafe)) {
+			scheduler.failsafeNotify();
+		}
+		else {
+			scheduler.timerNotify();
+		}
 	}
 	
 	/**
@@ -133,6 +138,11 @@ public class TimerHandler extends Thread {
 			killTimer((String)keys.nextElement());
 		}
 		timeoutEventQueue = new Queue();
+	}
+	
+	public synchronized void stopTimer(String timerId) {
+		((SPOTTimer)activeTimers.get(timerId)).stop();
+		((Thread)activeTimerThreads.get(timerId)).interrupt();
 	}
 	
 	/**

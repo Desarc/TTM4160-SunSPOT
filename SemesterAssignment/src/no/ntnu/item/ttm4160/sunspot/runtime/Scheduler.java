@@ -24,7 +24,7 @@ public class Scheduler extends Thread {
 	private String previousStateMachine;
 	
 	private boolean discardOldEvents = false;
-	private long oldEventLimit = 2000;
+	private int oldEventLimit = 2000;
 	private int starvationLimit = 3;
 	
 	public static final String idle = "idle"; //no events being processed by any state machine
@@ -412,16 +412,17 @@ public class Scheduler extends Thread {
 		return activeStateMachines.elements();
 	}
 	
-	public synchronized int getActiveStateMachineConnections(){
+	public synchronized Hashtable getActiveStateMachineConnections(){
 		Enumeration elements = activeStateMachines.elements();
 		int size = 0;
+		Hashtable connections = new Hashtable();
 		while (elements.hasMoreElements()) {
 			StateMachine sm = (StateMachine) elements.nextElement();
-			Hashtable connections = sm.app.com.getRemoteAddressBook();
+			connections = sm.app.com.getRemoteAddressBook();
 			size = connections.size();
 			break;
 		}
-		return size;
+		return connections;
 	}
 
 	/**

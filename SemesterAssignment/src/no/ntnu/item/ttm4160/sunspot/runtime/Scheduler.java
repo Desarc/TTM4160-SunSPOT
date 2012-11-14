@@ -333,11 +333,11 @@ public class Scheduler extends Thread {
 	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
-		eventQueues.put(eventQueue.getId(), eventQueue);
+		eventQueues.put(eventQueue.getStateMachineId(), eventQueue);
 	}
 
 	public synchronized void addTimerHandler(TimerHandler handler) {
-		timerHandlers.put(handler.getId(), handler);		
+		timerHandlers.put(handler.getStatemachineId(), handler);
 	}
 	
 	/**

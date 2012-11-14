@@ -163,15 +163,11 @@ public class TimerHandler extends Thread {
 		return next;
 	}
 	
-	public String getStateMachineId() {
-		return stateMachineId;
-	}
-	
 	public int getSchedulingPriority() {
 		return priority;
 	}
 
-	public String getId() {
+	public String getStatemachineId() {
 		return stateMachineId;
 	}
 }

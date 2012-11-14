@@ -134,7 +134,6 @@ public class SendingStateMachine extends StateMachine {
 					}
 					sendDisconnect();
 					blinkLEDs();
-					app.com.destroy();
 					state = ready;
 					returnControlToScheduler(true);
 				}

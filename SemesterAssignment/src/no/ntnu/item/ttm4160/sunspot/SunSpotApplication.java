@@ -28,6 +28,7 @@ import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
 
 import no.ntnu.item.ttm4160.sunspot.communication.Communications;
+import no.ntnu.item.ttm4160.sunspot.communication.ICommunicationLayer;
 import no.ntnu.item.ttm4160.sunspot.runtime.EventHandler;
 import no.ntnu.item.ttm4160.sunspot.runtime.Scheduler;
 
@@ -49,7 +50,7 @@ import com.sun.spot.util.IEEEAddress;
 public class SunSpotApplication extends MIDlet {
 	
 	public Scheduler scheduler;
-	public Communications com;
+	public ICommunicationLayer com;
 	public ITriColorLED [] leds = EDemoBoard.getInstance().getLEDs();
     public ILightSensor lightSensor = EDemoBoard.getInstance().getLightSensor();
     public String MAC;

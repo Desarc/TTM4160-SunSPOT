@@ -22,7 +22,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	private SunSpotApplication app;
 	private ISwitch sw1, sw2;
 	private int maxReceiveConnections = 1;
-	private int maxSendConnections = 5;
+	private int maxSendConnections = 2;
 	private int activeReceiveConnections;
 	private int activeSendConnections;
 	
@@ -70,19 +70,22 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 				}
 				return;
 			}
-			SendingStateMachine sendingStateMachine = new SendingStateMachine(""+System.currentTimeMillis(), scheduler, app);
-			EventQueue eventQueue = new EventQueue(sendingStateMachine.getStateMachineId(), sendingStateMachine.getStateMachinePriority());
-			Event event = generateEvent(action, sendingStateMachine.getStateMachineId());
-			TimerHandler handler = new TimerHandler(sendingStateMachine.getStateMachineId(), scheduler, this, sendingStateMachine.getStateMachinePriority());
+			String stateMachineId = ""+System.currentTimeMillis();
+			int priority = 0;
+			TimerHandler timerHandler = new TimerHandler(stateMachineId, scheduler, this, priority);
+			SendingStateMachine sendingStateMachine = new SendingStateMachine(stateMachineId, scheduler, timerHandler, app, priority);
+			EventQueue eventQueue = new EventQueue(stateMachineId, priority);
+			Event event = generateEvent(action, stateMachineId);
+			
 			Thread stateMachineThread = sendingStateMachine.startThread();
 			activeSendConnections++;
 			if (SunSpotApplication.output) {
 				System.out.println("Number of active send connections: "+activeSendConnections);
 			}
 			scheduler.addStateMachine(sendingStateMachine);
-			scheduler.addStateMachineThread(stateMachineThread, sendingStateMachine.getStateMachineId());
+			scheduler.addStateMachineThread(stateMachineThread, stateMachineId);
 			scheduler.addEventQueue(eventQueue);
-			scheduler.addTimerHandler(handler);
+			scheduler.addTimerHandler(timerHandler);
 			scheduler.addInternalEvent(event);
 		}
 		else if (action.equals(button2)) {
@@ -147,18 +150,20 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 				}
 				return;
 			}
-			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(message.getSender(), scheduler, app);
-			EventQueue eventQueue = new EventQueue(receiveStateMachine.getStateMachineId(), receiveStateMachine.getStateMachinePriority());
-			TimerHandler handler = new TimerHandler(receiveStateMachine.getStateMachineId(), scheduler, this, receiveStateMachine.getStateMachinePriority());
+			String stateMachineId = message.getSender();
+			int priority = 0;
+			TimerHandler timerHandler = new TimerHandler(stateMachineId, scheduler, this, priority);
+			ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine(stateMachineId, scheduler, timerHandler, app);
+			EventQueue eventQueue = new EventQueue(stateMachineId, priority);
 			Thread stateMachineThread = receiveStateMachine.startThread();
 			activeReceiveConnections++;
 			if (SunSpotApplication.output) {	
 				System.out.println("Number of active receive connections: "+activeReceiveConnections);
 			}
 			scheduler.addStateMachine(receiveStateMachine);
-			scheduler.addStateMachineThread(stateMachineThread, receiveStateMachine.getStateMachineId());
+			scheduler.addStateMachineThread(stateMachineThread, stateMachineId);
 			scheduler.addEventQueue(eventQueue);
-			scheduler.addTimerHandler(handler);
+			scheduler.addTimerHandler(timerHandler);
 			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {

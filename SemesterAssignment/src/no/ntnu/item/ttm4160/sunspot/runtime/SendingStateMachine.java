@@ -19,19 +19,20 @@ public class SendingStateMachine extends StateMachine {
 	
 	
 	private int readings;
-	private String receiver;
-	private String giveUpTimer;
-	private long freq = 200;
+	private String receiverId;
+	private String giveUpTimerId;
+	private String sendingTimerId;
+	private long frequency = 200;
 	private long giveUpTime = 5000;
 	private long broadcastTime = 1000;
 	
-	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
-		super(stateMachineId, scheduler, app);
+	public SendingStateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app) {
+		super(stateMachineId, scheduler, timerHandler, app);
 		this.state = ready;
 	}
 	
-	public SendingStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, int priority) {
-		super(stateMachineId, scheduler, app, priority);
+	public SendingStateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app, int priority) {
+		super(stateMachineId, scheduler, timerHandler, app, priority);
 		this.state = ready;
 	}
 	
@@ -59,8 +60,8 @@ public class SendingStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, broadcastTime);
-					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
+					sendingTimerId = timerHandler.addNewTimer(broadcastTime);
+					timerHandler.startTimer(sendingTimerId, giveUp);
 					sendBroadcast();
 					state = wait_response;
 					returnControlToScheduler(false);
@@ -71,16 +72,16 @@ public class SendingStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nReceived broadcast response, approving...\n");
-						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiverId);
 						System.out.println("------------------------------------------");
 					}
-					receiver = currentEvent.getData();
+					receiverId = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, freq);
-					giveUpTimer = scheduler.addTimer(stateMachineId, giveUpTime);
-					scheduler.startTimer(stateMachineId, giveUpTimer, giveUp);
-					scheduler.startTimer(stateMachineId, currentTimer, timeout);
+					sendingTimerId = timerHandler.addNewTimer(frequency);
+					giveUpTimerId = timerHandler.addNewTimer(giveUpTime);
+					timerHandler.startTimer(giveUpTimerId, giveUp);
+					timerHandler.startTimer(sendingTimerId, timeout);
 					sendApproved();
 					state = sending;
 					returnControlToScheduler(false);
@@ -101,11 +102,11 @@ public class SendingStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nSending light readings...\n");
-						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiverId);
 						System.out.println("------------------------------------------");
 					}
-					scheduler.resetTimer(stateMachineId, currentTimer);
-					scheduler.resetTimer(stateMachineId, giveUpTimer);
+					timerHandler.resetTimer(sendingTimerId);
+					timerHandler.resetTimer(giveUpTimerId);
 					sendReadings();
 					state = sending;
 					returnControlToScheduler(false);
@@ -129,7 +130,7 @@ public class SendingStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nDisconnecting...\n");
-						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiverId);
 						System.out.println("------------------------------------------");
 					}
 					sendDisconnect();
@@ -144,7 +145,7 @@ public class SendingStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nReceiver disconnected.\n");
-						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiver);
+						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiverId);
 						System.out.println("------------------------------------------");
 					}
 					blinkLEDs();
@@ -183,7 +184,7 @@ public class SendingStateMachine extends StateMachine {
 	 * Sends a 'SenderDisconnect' message to the connected receiver.
 	 */
 	private void sendDisconnect() {
-		Message disconnect = new Message(app.MAC+":"+stateMachineId, receiver, Message.SenderDisconnect);
+		Message disconnect = new Message(app.MAC+":"+stateMachineId, receiverId, Message.SenderDisconnect);
 		app.com.sendRemoteMessage(disconnect);
 	}
 
@@ -191,7 +192,7 @@ public class SendingStateMachine extends StateMachine {
 	 * Sends an 'Approved' message to the connected receiver.
 	 */
 	private void sendApproved() {
-		Message approved = new Message(app.MAC+":"+stateMachineId, receiver, Message.Approved);
+		Message approved = new Message(app.MAC+":"+stateMachineId, receiverId, Message.Approved);
 		app.com.sendRemoteMessage(approved);
 	}
 
@@ -214,14 +215,14 @@ public class SendingStateMachine extends StateMachine {
 	 * Sends a message with the current light readings.
 	 */
 	private void sendReadings() {
-		Message message = new Message(app.MAC+":"+stateMachineId, receiver, Message.Reading+registerReadings());
+		Message message = new Message(app.MAC+":"+stateMachineId, receiverId, Message.Reading+getReadings());
 		app.com.sendRemoteMessage(message);
 	}
 	
 	/**
 	 * Fetches light readings from this SunSPOT.
 	 */
-	private String registerReadings() {
+	private String getReadings() {
 		readings = -1;
 		try {
 			readings = app.lightSensor.getAverageValue();
@@ -234,8 +235,8 @@ public class SendingStateMachine extends StateMachine {
 		return Integer.toString(readings);
 	}
 	
-	public String getReceiver() {
-		return receiver;
+	public String getReceiverId() {
+		return receiverId;
 	}
 	
 }

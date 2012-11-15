@@ -16,16 +16,17 @@ public class ReceiveStateMachine extends StateMachine {
 	public static final String busy = "busy";
 	public static final String wait_approved = "wait_approved";
 	
-	private String sender;
+	private String senderId;
+	private String giveUpTimerId;
 	private long giveUpTime = 5000;
 	
-	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
-		super(stateMachineId, scheduler, app);
+	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app) {
+		super(stateMachineId, scheduler, timerHandler, app);
 		this.state = free;
 	}
 	
-	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, int priority) {
-		super(stateMachineId, scheduler, app, priority);
+	public ReceiveStateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app, int priority) {
+		super(stateMachineId, scheduler, timerHandler, app, priority);
 		this.state = free;
 	}
 	
@@ -49,9 +50,12 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nBroadcast received!\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
+					Event giveUp = new Event(Event.receiverGiveUp, stateMachineId, System.currentTimeMillis());
+					giveUpTimerId = timerHandler.addNewTimer(giveUpTime);
+					timerHandler.startTimer(giveUpTimerId, giveUp);
 					sendBroadcastResponse();
 					state = wait_approved;
 					returnControlToScheduler(false);
@@ -60,7 +64,7 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nBroadcast received, but already waiting. Saving for later.\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
 					scheduler.saveEvent(currentEvent, stateMachineId);
@@ -73,12 +77,10 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nConnection approved!\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					Event giveUp = new Event(Event.receiverGiveUp, stateMachineId, System.currentTimeMillis());
-					currentTimer = scheduler.addTimer(stateMachineId, giveUpTime);
-					scheduler.startTimer(stateMachineId, currentTimer, giveUp);
+					timerHandler.resetTimer(giveUpTimerId);
 					state = busy;
 					returnControlToScheduler(false);
 				}
@@ -88,9 +90,10 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nConnection denied!\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
+					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
 				}
@@ -100,7 +103,7 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nSender disconnected.\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
 					blinkLEDs();
@@ -113,7 +116,7 @@ public class ReceiveStateMachine extends StateMachine {
 					if (SunSpotApplication.output) {	
 						System.out.println("------------------------------------------");
 						System.out.println("\nDisconnecting...\n");
-						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+sender);
+						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
 					sendDisconnect();
@@ -131,7 +134,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					displayReadings();
-					resetGiveUpTimer();
+					timerHandler.resetTimer(giveUpTimerId);
 					state = busy;
 					returnControlToScheduler(false);
 				}
@@ -176,19 +179,12 @@ public class ReceiveStateMachine extends StateMachine {
 			}
 		}
 	}
-	
-	/**
-	 * Resets the giveUpTimer.
-	 */
-	private void resetGiveUpTimer() {
-		scheduler.resetTimer(stateMachineId, currentTimer);
-	}
 
 	/**
 	 * Sends a 'ReceiverDisconnect' message to the connected sender.
 	 */
 	private void sendDisconnect() {
-		Message disconnect = new Message(app.MAC+":"+stateMachineId, sender, Message.ReceiverDisconnect);
+		Message disconnect = new Message(app.MAC+":"+stateMachineId, senderId, Message.ReceiverDisconnect);
 		app.com.sendRemoteMessage(disconnect);
 	}
 
@@ -203,8 +199,8 @@ public class ReceiveStateMachine extends StateMachine {
 	 * Sends an 'ICanDisplayReadings' response to a broadcaster.
 	 */
 	private void sendBroadcastResponse() {
-		sender = currentEvent.getStateMachineId();
-		Message response = new Message(app.MAC+":"+stateMachineId, sender, Message.ICanDisplayReadings);
+		senderId = currentEvent.getStateMachineId();
+		Message response = new Message(app.MAC+":"+stateMachineId, senderId, Message.ICanDisplayReadings);
 		try {
 			sleep(100);					//for some reason we get interrupted here, sleeping a little to avoid the application dying
 		} catch (InterruptedException e) {

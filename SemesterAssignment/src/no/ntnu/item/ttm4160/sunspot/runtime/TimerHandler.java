@@ -13,7 +13,7 @@ import com.sun.spot.util.Queue;
  * Class for handling timers and timeout-events for a specific {@link StateMachine}.
  *
  */
-public class TimerHandler extends Thread {
+public class TimerHandler {
 	
 	private Queue timeoutEventQueue;
 	private Hashtable activeTimers;
@@ -90,7 +90,7 @@ public class TimerHandler extends Thread {
 	 * Resets a timer, making it start again with the same event type.
 	 * @param timerId
 	 */
-	public void resetTimer(String timerId) {
+	public synchronized void resetTimer(String timerId) {
 		Thread timerThread = (Thread)activeTimerThreads.get(timerId);
 		if (SunSpotApplication.output) {
 			System.out.println("TIMERHANDLER INTERRUPTING TIMER "+timerThread);
@@ -103,7 +103,7 @@ public class TimerHandler extends Thread {
 	/**
 	 * Starts a given {@link SPOTTimer}, and provides it with an {@link Event} to forward at timeout.
 	 */
-	public void startTimer(String timerId, Event event) {
+	public synchronized void startTimer(String timerId, Event event) {
 		SPOTTimer timer = (SPOTTimer)activeTimers.get(timerId);
 		if (!timer.isRunning()) {
 			timer.setEvent(event);

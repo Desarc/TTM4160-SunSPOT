@@ -15,7 +15,7 @@ public abstract class StateMachine extends Thread {
 	protected Scheduler scheduler;
 	protected SunSpotApplication app;
 	protected Event currentEvent;
-	protected String currentTimer;
+	protected TimerHandler timerHandler;
 	protected boolean active;
 	/*
 	 * Default priority is zero.
@@ -30,11 +30,12 @@ public abstract class StateMachine extends Thread {
 	 * @param scheduler A reference to the {@link Scheduler}.
 	 * @param app A reference to the {@link SunSpotApplication} for LED-control.
 	 */
-	public StateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app) {
+	public StateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app) {
 		this.stateMachineId = stateMachineId;
 		this.scheduler = scheduler;
 		this.app = app;
 		this.active = true;
+		this.timerHandler = timerHandler;
 	}
 	
 	/**
@@ -44,8 +45,8 @@ public abstract class StateMachine extends Thread {
 	 * @param app A reference to the {@link SunSpotApplication} for LED-control.
 	 * @param priority The scheduling priority for this state machine. {@link int}
 	 */
-	public StateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, int priority) {
-		this(stateMachineId, scheduler, app);
+	public StateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app, int priority) {
+		this(stateMachineId, scheduler, timerHandler, app);
 		this.priority = priority;
 	}
 	
@@ -92,10 +93,6 @@ public abstract class StateMachine extends Thread {
 	
 	public int getStateMachinePriority() {
 		return this.priority;
-	}
-	
-	public String getCurrentTimer() {
-		return currentTimer;
 	}
 	
 	public void deactivate() {

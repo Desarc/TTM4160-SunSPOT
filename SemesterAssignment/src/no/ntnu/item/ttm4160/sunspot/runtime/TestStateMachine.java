@@ -21,8 +21,8 @@ public class TestStateMachine extends StateMachine {
 	public static final String on = "on";
 	public static final String off = "off";
 	
-	public TestStateMachine(String stateMachineId, Scheduler scheduler, SunSpotApplication app, LEDColor color, long speed, boolean slow) {
-		super(stateMachineId, scheduler, app);
+	public TestStateMachine(String stateMachineId, Scheduler scheduler, TimerHandler timerHandler, SunSpotApplication app, LEDColor color, long speed, boolean slow) {
+		super(stateMachineId, scheduler, timerHandler, app);
 		state = idle;
 		this.color = color;
 		this.speed = speed;
@@ -30,7 +30,7 @@ public class TestStateMachine extends StateMachine {
 	}
 	
 	public void run() {
-		activeTimer = scheduler.addTimer(stateMachineId, speed);
+		activeTimer = timerHandler.addNewTimer(speed);
 		while (true) {
 			if (SunSpotApplication.output) {	
 				System.out.println(Thread.currentThread());
@@ -47,7 +47,7 @@ public class TestStateMachine extends StateMachine {
 				}
 				state = on;
 				Event off = new Event(Event.testOff, stateMachineId, System.currentTimeMillis());
-				scheduler.startTimer(stateMachineId, activeTimer, off);
+				timerHandler.startTimer(activeTimer, off);
 				long time = System.currentTimeMillis();
 				while (System.currentTimeMillis() < time+200 && slow) {}
 				currentEvent = null;
@@ -59,7 +59,7 @@ public class TestStateMachine extends StateMachine {
 				}
 				state = off;
 				Event on = new Event(Event.testOn, stateMachineId, System.currentTimeMillis());
-				scheduler.startTimer(stateMachineId, activeTimer, on);
+				timerHandler.startTimer(activeTimer, on);
 				long time = System.currentTimeMillis();
 				while (System.currentTimeMillis() < time+200 && slow) {}
 				currentEvent = null;

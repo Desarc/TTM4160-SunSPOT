@@ -16,19 +16,19 @@ import no.ntnu.item.ttm4160.sunspot.utils.*;
 public class Scheduler extends Thread {
 	
 	private Hashtable activeStateMachines;
-	private Hashtable activeThreads;
+	private Hashtable activeStateMachineThreads;
 	private Hashtable eventQueues;
 	private Hashtable timerHandlers;
 	private String state;
 	private int starvationCounter;
-	private String previousStateMachine;
+	private String previousStateMachineId;
 	
 	private TimerHandler failsafeHandler;
-	private String failsafeTimer;
+	private String failsafeTimerId;
 	
 	private boolean discardOldEvents = false;
-	private int oldEventLimit = 2000;
-	private int starvationLimit = 3;
+	private long oldEventLimit = 2000;
+	private int starvationLimit = 5;
 	
 	public static final String idle = "idle"; //no events being processed by any state machine
 	public static final String busy = "busy"; //a state machine is processing an event
@@ -43,12 +43,12 @@ public class Scheduler extends Thread {
 		eventQueues = new Hashtable();
 		timerHandlers = new Hashtable();
 		activeStateMachines = new Hashtable();
-		activeThreads = new Hashtable();
+		activeStateMachineThreads = new Hashtable();
 		starvationCounter = 0;
-		previousStateMachine = "";
+		previousStateMachineId = "";
 		
 		failsafeHandler = new TimerHandler("scheduler", this, null, 0);
-		failsafeTimer = failsafeHandler.addNewTimer(5000);
+		failsafeTimerId = failsafeHandler.addNewTimer(5000);
 	}
 	
 	/**
@@ -117,7 +117,7 @@ public class Scheduler extends Thread {
 	 * its priority.
 	 */
 	private synchronized void getNextEvent() {
-		failsafeHandler.startTimer(failsafeTimer, new Event(Event.failsafe, "scheduler", 0));
+		failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
 		
 		if (SunSpotApplication.output) {
 			System.out.println("Getting next event, state: "+state);
@@ -134,7 +134,7 @@ public class Scheduler extends Thread {
 		//internal events must be prioritized first
 		for (Enumeration e = eventQueues.keys(); e.hasMoreElements() ;) {
 			String stateMachineId = (String)e.nextElement();
-			if (stateMachineId == previousStateMachine && skip) {
+			if (stateMachineId == previousStateMachineId && skip) {
 				continue;
 			}
 			EventQueue queue = (EventQueue)eventQueues.get(stateMachineId);
@@ -157,14 +157,14 @@ public class Scheduler extends Thread {
 			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
-			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
+			Thread currentThread = (Thread)activeStateMachineThreads.get(currentEvent.getStateMachineId());
+			if (currentMachine.getStateMachineId().equals(previousStateMachineId)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getStateMachineId();
+			previousStateMachineId = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -176,7 +176,7 @@ public class Scheduler extends Thread {
 		//timeout events have priority over external events
 		for (Enumeration e = timerHandlers.keys(); e.hasMoreElements() ;) {
 			String stateMachineId = (String)e.nextElement();
-			if (stateMachineId == previousStateMachine && skip) {
+			if (stateMachineId == previousStateMachineId && skip) {
 				continue;
 			}
 			TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
@@ -199,14 +199,14 @@ public class Scheduler extends Thread {
 			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());
 			currentMachine.assignEvent(currentEvent);
-			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
+			Thread currentThread = (Thread)activeStateMachineThreads.get(currentEvent.getStateMachineId());
+			if (currentMachine.getStateMachineId().equals(previousStateMachineId)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getStateMachineId();
+			previousStateMachineId = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -217,7 +217,7 @@ public class Scheduler extends Thread {
 		//checking for external events, if there are no timeouts or internal events
 		for (Enumeration e = eventQueues.keys(); e.hasMoreElements() ;) {
 			String stateMachineId = (String)e.nextElement();
-			if (stateMachineId == previousStateMachine && skip) {
+			if (stateMachineId == previousStateMachineId && skip) {
 				continue;
 			}
 			EventQueue queue = (EventQueue)eventQueues.get(stateMachineId);
@@ -240,14 +240,14 @@ public class Scheduler extends Thread {
 			}
 			StateMachine currentMachine = (StateMachine)activeStateMachines.get(currentEvent.getStateMachineId());			
 			currentMachine.assignEvent(currentEvent);
-			Thread currentThread = (Thread)activeThreads.get(currentEvent.getStateMachineId());
-			if (currentMachine.getStateMachineId().equals(previousStateMachine)) {
+			Thread currentThread = (Thread)activeStateMachineThreads.get(currentEvent.getStateMachineId());
+			if (currentMachine.getStateMachineId().equals(previousStateMachineId)) {
 				starvationCounter++;
 			}
 			else {
 				starvationCounter = 0;
 			}
-			previousStateMachine = currentMachine.getStateMachineId();
+			previousStateMachineId = currentMachine.getStateMachineId();
 			if (SunSpotApplication.output) {
 				System.out.println("SCHEDULER INTERRUPTING STATE MACHINE "+currentThread);
 			}
@@ -281,29 +281,6 @@ public class Scheduler extends Thread {
 		return false;
 	}
 
-
-	/**
-	 * Adds a new {@link SPOTTimer} for a given {@link StateMachine}.
-	 * @param stateMachineId
-	 * @param time Time before timeout. {@link long}
-	 * @return 
-	 */
-	public synchronized String addTimer(String stateMachineId, long time) {
-		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
-		return handler.addNewTimer(time);
-	}
-	
-	/**
-	 * Starts a given {@link SPOTTimer}.
-	 * @param stateMachineId
-	 * @param timerId
-	 * @param event
-	 */
-	public synchronized void startTimer(String stateMachineId, String timerId, Event event) {
-		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
-		handler.startTimer(timerId, event);
-	}
-
 	/**
 	 * Returns control to the scheduler, allowing another event to be processed. If terminate is set,
 	 * the scheduler terminates the {@link StateMachine} releasing control, in addition to its {@link EventQueue}
@@ -313,7 +290,7 @@ public class Scheduler extends Thread {
 	 */
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
 		
-		failsafeHandler.stopTimer(failsafeTimer);
+		failsafeHandler.stopTimer(failsafeTimerId);
 		
 		if (SunSpotApplication.output) {
 			System.out.println("Control returned to scheduler");
@@ -338,7 +315,7 @@ public class Scheduler extends Thread {
 	private synchronized void terminateStateMachine(String stateMachineId) {
 		((StateMachine)activeStateMachines.get(stateMachineId)).deactivate();
 		activeStateMachines.remove(stateMachineId);
-		activeThreads.remove(stateMachineId);
+		activeStateMachineThreads.remove(stateMachineId);
 		((TimerHandler)timerHandlers.get(stateMachineId)).killAllTimers();
 		timerHandlers.remove(stateMachineId);
 		eventQueues.remove(stateMachineId);
@@ -349,7 +326,7 @@ public class Scheduler extends Thread {
 	}
 	
 	public synchronized void addStateMachineThread(Thread stateMachineThread, String stateMachineId) {
-		activeThreads.put(stateMachineId, stateMachineThread);
+		activeStateMachineThreads.put(stateMachineId, stateMachineThread);
 	}
 
 	public synchronized void addEventQueue(EventQueue eventQueue) {
@@ -409,20 +386,6 @@ public class Scheduler extends Thread {
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.killAllTimers();
 	}
-	
-	/**
-	 * Kills a given {@link SPOTTimer}.
-	 * @param stateMachineId
-	 * @param timerId
-	 */
-	public synchronized void killTimer(String stateMachineId, String timerId) {
-		if (SunSpotApplication.output) {
-			System.out.println("Killing timer "+timerId);
-		}
-		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
-		handler.killTimer(timerId);
-	}
-
 
 	public synchronized Enumeration getIDs() {
 		return activeStateMachines.keys();
@@ -444,18 +407,6 @@ public class Scheduler extends Thread {
 //		}
 //		return connections;
 //	}
-
-	/**
-	 * Resets a given {@link SPOTTimer}.
-	 * @param stateMachineId
-	 * @param currentTimer
-	 */
-	public synchronized void resetTimer(String stateMachineId, String currentTimer) {
-		if (SunSpotApplication.output) {
-			System.out.println("Resetting timer");
-		}
-		((TimerHandler)timerHandlers.get(stateMachineId)).resetTimer(currentTimer);
-	}
 	
 	/**
 	 * Checks if a given {@link StateMachine} exists, and is active.
@@ -479,7 +430,7 @@ public class Scheduler extends Thread {
 		while (elements.hasMoreElements()) {
 			try {
 				SendingStateMachine sm = (SendingStateMachine) elements.nextElement();
-				String smMAC = sm.getReceiver();
+				String smMAC = sm.getReceiverId();
 				if (MAC.equals(smMAC.substring(0,smMAC.indexOf(":")))) {
 					return true;
 				}

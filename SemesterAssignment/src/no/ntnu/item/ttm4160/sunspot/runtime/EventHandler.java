@@ -55,16 +55,6 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			System.out.println("Button pressed.");
 		}
 		if (action.equals(button1)) {
-//			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app, LEDColor.BLUE, 100, false);
-//			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
-//			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, this, test.getStateMachinePriority());
-//			Thread stateMachineThread = test.startThread();
-//			scheduler.addStateMachine(test);
-//			scheduler.addStateMachineThread(stateMachineThread, test.getId());
-//			scheduler.addEventQueue(eventQueue);
-//			scheduler.addTimerHandler(handler);
-//			scheduler.addInternalEvent(event);
 			if (activeSendConnections >= maxSendConnections) {
 				if (SunSpotApplication.output) {
 					System.out.println("Too many connections, skipping broadcast.");
@@ -91,19 +81,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		}
 		else if (action.equals(button2)) {
 			if (SunSpotApplication.output) {
-				//System.out.println("number of active statemachines "+scheduler.getActiveStateMachineConnections());
+				System.out.println("Disconnecting all.");
 			}
 			disconnectAll();
-//			TestStateMachine test = new TestStateMachine(""+System.currentTimeMillis(), scheduler, app, LEDColor.GREEN, 1000, true);
-//			EventQueue eventQueue = new EventQueue(test.getId(), test.getStateMachinePriority());
-//			Event event = new Event(Event.testOn, test.getId(), System.currentTimeMillis());
-//			TimerHandler handler = new TimerHandler(test.getId(), scheduler, this, test.getStateMachinePriority());
-//			Thread stateMachineThread = test.startThread();
-//			scheduler.addStateMachine(test);
-//			scheduler.addStateMachineThread(stateMachineThread, test.getId());
-//			scheduler.addEventQueue(eventQueue);
-//			scheduler.addTimerHandler(handler);
-//			scheduler.addInternalEvent(event);
 		}
 	}
 
@@ -115,6 +95,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		activeSendConnections = 0;
 		Enumeration ids = scheduler.getIDs();
 		while (ids.hasMoreElements()) {
+			scheduler.killAllTimers(ids.nextElement().toString());
 			Event event = generateEvent(button2, ids.nextElement().toString());
 			scheduler.addInternalEvent(event);
 		}

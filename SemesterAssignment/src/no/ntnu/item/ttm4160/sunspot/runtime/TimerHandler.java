@@ -60,10 +60,6 @@ public class TimerHandler {
 	 * @param timer
 	 */
 	public synchronized void timeout(SPOTTimer timer) {
-//		if (timer.getEvent() == null) {
-//			System.out.println("No event.");
-//			return;
-//		}
 		Event timeout = timer.getEvent();
 		if (timeout.getType().equals(Event.broadcastGiveUp)) {
 			eventHandler.decreaseActiveSendConnections();
@@ -78,12 +74,7 @@ public class TimerHandler {
 		else {
 			timeoutEventQueue.put(timeout);
 		}
-		if (timeout.getType().equals(Event.failsafe)) {
-			scheduler.failsafeNotify();
-		}
-		else {
-			scheduler.timerNotify();
-		}
+		scheduler.timerNotify();
 	}
 	
 	/**

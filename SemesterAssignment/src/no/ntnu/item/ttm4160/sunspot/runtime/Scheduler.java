@@ -23,9 +23,6 @@ public class Scheduler extends Thread {
 	private int starvationCounter;
 	private String previousStateMachineId;
 	
-	//private TimerHandler failsafeHandler;
-	//private String failsafeTimerId;
-	
 	private boolean discardOldEvents = false;
 	private long oldEventLimit = 2000;
 	private int starvationLimit = 5;
@@ -46,17 +43,6 @@ public class Scheduler extends Thread {
 		activeStateMachineThreads = new Hashtable();
 		starvationCounter = 0;
 		previousStateMachineId = "";
-		
-		//failsafeHandler = new TimerHandler("scheduler", this, null, 0);
-		//failsafeTimerId = failsafeHandler.addNewTimer(5000);
-	}
-	
-	/**
-	 * In case of a program fail stopping the scheduler, spawn a new scheduler thread on the same instance.
-	 */
-	public void failsafeNotify() {
-		System.out.println("\nFAILSAFE!\n");
-		this.run();
 	}
 	
 	public void run() {
@@ -70,9 +56,7 @@ public class Scheduler extends Thread {
 				if (SunSpotApplication.output) {
 					System.out.println("Scheduler thread: "+Thread.currentThread());
 				}
-				//failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
 				getNextEvent();
-				//failsafeHandler.stopTimer(failsafeTimerId);
 			}
 		}
 	}
@@ -403,19 +387,6 @@ public class Scheduler extends Thread {
 	public synchronized Enumeration getActiveStateMachineElements(){
 		return activeStateMachines.elements();
 	}
-	
-//	public synchronized Hashtable getActiveStateMachineConnections(){
-//		Enumeration elements = activeStateMachines.elements();
-//		int size = 0;
-//		Hashtable connections = new Hashtable();
-//		while (elements.hasMoreElements()) {
-//			StateMachine sm = (StateMachine) elements.nextElement();
-//			connections = sm.app.com.getRemoteAddressBook();
-//			size = connections.size();
-//			break;
-//		}
-//		return connections;
-//	}
 	
 	/**
 	 * Checks if a given {@link StateMachine} exists, and is active.

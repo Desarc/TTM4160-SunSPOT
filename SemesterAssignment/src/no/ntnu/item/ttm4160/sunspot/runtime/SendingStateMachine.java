@@ -22,6 +22,7 @@ public class SendingStateMachine extends StateMachine {
 	private String receiverId;
 	private String giveUpTimerId;
 	private String sendingTimerId;
+	private String broadcastTimerId;
 	private long frequency = 200;
 	private long giveUpTime = 5000;
 	private long broadcastTime = 1000;
@@ -60,8 +61,8 @@ public class SendingStateMachine extends StateMachine {
 						System.out.println("------------------------------------------");
 					}
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());
-					sendingTimerId = timerHandler.addNewTimer(broadcastTime);
-					timerHandler.startTimer(sendingTimerId, giveUp);
+					broadcastTimerId = timerHandler.addNewTimer(broadcastTime);
+					timerHandler.startTimer(broadcastTimerId, giveUp);
 					sendBroadcast();
 					state = wait_response;
 					returnControlToScheduler(false);
@@ -75,6 +76,7 @@ public class SendingStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+stateMachineId+", receiving SPOT: "+receiverId);
 						System.out.println("------------------------------------------");
 					}
+					timerHandler.stopTimer(broadcastTimerId);
 					receiverId = currentEvent.getData();
 					Event timeout = new Event(Event.sendReadings, stateMachineId, System.currentTimeMillis());
 					Event giveUp = new Event(Event.broadcastGiveUp, stateMachineId, System.currentTimeMillis());

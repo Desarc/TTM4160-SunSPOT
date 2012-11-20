@@ -80,7 +80,6 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					//timerHandler.resetTimer(giveUpTimerId);
 					state = busy;
 					returnControlToScheduler(false);
 				}
@@ -93,7 +92,6 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					//timerHandler.stopTimer(giveUpTimerId);
 					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
@@ -107,7 +105,6 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					//timerHandler.stopTimer(giveUpTimerId);
 					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
@@ -121,7 +118,6 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					//timerHandler.stopTimer(giveUpTimerId);
 					sendDisconnect();
 					blinkLEDs();
 					state = free;
@@ -136,7 +132,6 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+currentEvent.getStateMachineId());
 						System.out.println("------------------------------------------");
 					}
-					//timerHandler.resetTimer(giveUpTimerId);
 					displayReadings();
 					state = busy;
 					returnControlToScheduler(false);
@@ -204,13 +199,6 @@ public class ReceiveStateMachine extends StateMachine {
 	private void sendBroadcastResponse() {
 		senderId = currentEvent.getStateMachineId();
 		Message response = new Message(app.MAC+":"+stateMachineId, senderId, Message.ICanDisplayReadings);
-		try {
-			sleep(100);					//for some reason we get interrupted here, sleeping a little to avoid the application dying
-		} catch (InterruptedException e) {
-			if (SunSpotApplication.output) {	
-				System.out.println("WRONGLY TIMED INTERRUPT!");
-			}
-		}
 		app.com.sendRemoteMessage(response);
 	}
 

@@ -40,6 +40,7 @@ public class SPOTTimer extends Thread {
 	 */
 	public Thread startThread() {
 		Thread timerThread = new Thread(this);
+		//timerThread.setPriority(4);
 		timerThread.start();
 		return timerThread;
 	}

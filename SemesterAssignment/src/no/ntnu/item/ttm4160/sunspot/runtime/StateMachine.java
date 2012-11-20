@@ -52,6 +52,7 @@ public abstract class StateMachine extends Thread {
 	
 	public Thread startThread() {
 		Thread stateMachineThread = new Thread(this);
+		//stateMachineThread.setPriority(4);
 		stateMachineThread.start();
 		return stateMachineThread;
 	}

@@ -22,9 +22,10 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	private SunSpotApplication app;
 	private ISwitch sw1, sw2;
 	private int maxReceiveConnections = 1;
-	private int maxSendConnections = 2;
+	private int maxSendConnections = 1;
 	private int activeReceiveConnections;
 	private int activeSendConnections;
+	private boolean sendAndReceive = false;
 	
 	public static final String button1 = "button1";
 	public static final String button2 = "button2";
@@ -138,18 +139,20 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			if (SunSpotApplication.output) {
 				System.out.println("Broadcast received by event handler.");				
 			}
-//			if (scheduler.checkIfActive(message.getSender()) ) {	// || scheduler.checkIfReceiver(message.getSenderMAC())
-//				if (SunSpotApplication.output) {					
-//					System.out.println("Already communication with this SPOT, discarding broadcast.");
-//				}
-//				return;
-//			}
+			
 			if (activeReceiveConnections >= maxReceiveConnections) {
 				if (SunSpotApplication.output) {	
 					System.out.println("Too many connections, discarding broadcast.");
 				}
 				return;
 			}
+			else if (!sendAndReceive && (scheduler.checkIfActive(event.getStateMachineId()) || scheduler.checkIfReceiver(message.getSenderMAC()))) {	// 
+				if (SunSpotApplication.output) {					
+					System.out.println("Already communication with this SPOT, discarding broadcast.");
+				}
+				return;
+			}
+			
 			String stateMachineId = message.getSender();
 			int priority = 0;
 			TimerHandler timerHandler = new TimerHandler(stateMachineId, scheduler, this, priority);
@@ -166,15 +169,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addTimerHandler(timerHandler);
 			scheduler.addExternalEvent(event);
 		}
-		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
-			scheduler.killAllTimers(event.getStateMachineId());
-			scheduler.addExternalEvent(event);
-		}
 		else if (message.getContent().equals(Message.Approved)) {
 			scheduler.resetAllTimers(event.getStateMachineId());
 			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.Denied)) {
+			activeReceiveConnections--;
 			scheduler.killAllTimers(event.getStateMachineId());
 			scheduler.addExternalEvent(event);
 		}
@@ -183,10 +183,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.SenderDisconnect)) {
+			activeReceiveConnections--;
 			scheduler.killAllTimers(event.getStateMachineId());
 			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.ReceiverDisconnect)) {
+			activeSendConnections--;
 			scheduler.killAllTimers(event.getStateMachineId());
 			scheduler.addExternalEvent(event);
 		}
@@ -227,16 +229,12 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			return new Event(Event.connectionApproved, message.getReceiverId(), message.getReceiver(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.Denied)) {
-			decreaseActiveReceiveConnections();
 			return new Event(Event.connectionDenied, message.getReceiverId(), message.getReceiver(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.ReceiverDisconnect)) {
-			decreaseActiveSendConnections();
-			scheduler.killAllTimers(message.getReceiverId());
 			return new Event(Event.receiverDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().equals(Message.SenderDisconnect)) {
-			decreaseActiveReceiveConnections();
 			return new Event(Event.senderDisconnect, message.getReceiverId(), System.currentTimeMillis());
 		}
 		else if(message.getContent().indexOf(Message.Reading) != -1) {

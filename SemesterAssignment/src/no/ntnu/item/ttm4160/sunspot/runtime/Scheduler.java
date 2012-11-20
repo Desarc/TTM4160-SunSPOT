@@ -55,6 +55,7 @@ public class Scheduler extends Thread {
 	 * In case of a program fail stopping the scheduler, spawn a new scheduler thread on the same instance.
 	 */
 	public void failsafeNotify() {
+		System.out.println("\nFAILSAFE!\n");
 		this.run();
 	}
 	
@@ -69,7 +70,9 @@ public class Scheduler extends Thread {
 				if (SunSpotApplication.output) {
 					System.out.println("Scheduler thread: "+Thread.currentThread());
 				}
+				failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
 				getNextEvent();
+				failsafeHandler.stopTimer(failsafeTimerId);
 			}
 		}
 	}
@@ -117,8 +120,6 @@ public class Scheduler extends Thread {
 	 * its priority.
 	 */
 	private synchronized void getNextEvent() {
-		failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
-		
 		if (SunSpotApplication.output) {
 			System.out.println("Getting next event, state: "+state);
 		}
@@ -258,6 +259,7 @@ public class Scheduler extends Thread {
 		if (SunSpotApplication.output) {
 			System.out.println("No event");
 		}
+		
 		if (skip) {
 			getNextEvent();
 		}
@@ -290,8 +292,6 @@ public class Scheduler extends Thread {
 	 */
 	public synchronized void returnControl(boolean terminate, String stateMachineId) {
 		
-		failsafeHandler.stopTimer(failsafeTimerId);
-		
 		if (SunSpotApplication.output) {
 			System.out.println("Control returned to scheduler");
 		}
@@ -301,9 +301,6 @@ public class Scheduler extends Thread {
 		if (SunSpotApplication.output) {
 			System.out.println("SCHEDULER INTERRUPTING ITSELF!");
 		}
-//		if (activeStateMachines.size() == 0) {
-//			app.com.destroy();
-//		}
 		interrupt();
 	}
 	

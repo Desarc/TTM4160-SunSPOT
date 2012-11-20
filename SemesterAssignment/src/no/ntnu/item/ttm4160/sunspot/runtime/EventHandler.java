@@ -95,8 +95,9 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 		activeSendConnections = 0;
 		Enumeration ids = scheduler.getIDs();
 		while (ids.hasMoreElements()) {
-			scheduler.killAllTimers(ids.nextElement().toString());
-			Event event = generateEvent(button2, ids.nextElement().toString());
+			String id = ids.nextElement().toString();
+			scheduler.killAllTimers(id);
+			Event event = generateEvent(button2, id);
 			scheduler.addInternalEvent(event);
 		}
 	}

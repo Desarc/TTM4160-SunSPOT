@@ -23,8 +23,8 @@ public class Scheduler extends Thread {
 	private int starvationCounter;
 	private String previousStateMachineId;
 	
-	private TimerHandler failsafeHandler;
-	private String failsafeTimerId;
+	//private TimerHandler failsafeHandler;
+	//private String failsafeTimerId;
 	
 	private boolean discardOldEvents = false;
 	private long oldEventLimit = 2000;
@@ -47,8 +47,8 @@ public class Scheduler extends Thread {
 		starvationCounter = 0;
 		previousStateMachineId = "";
 		
-		failsafeHandler = new TimerHandler("scheduler", this, null, 0);
-		failsafeTimerId = failsafeHandler.addNewTimer(5000);
+		//failsafeHandler = new TimerHandler("scheduler", this, null, 0);
+		//failsafeTimerId = failsafeHandler.addNewTimer(5000);
 	}
 	
 	/**
@@ -70,9 +70,9 @@ public class Scheduler extends Thread {
 				if (SunSpotApplication.output) {
 					System.out.println("Scheduler thread: "+Thread.currentThread());
 				}
-				failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
+				//failsafeHandler.startTimer(failsafeTimerId, new Event(Event.failsafe, "scheduler", 0));
 				getNextEvent();
-				failsafeHandler.stopTimer(failsafeTimerId);
+				//failsafeHandler.stopTimer(failsafeTimerId);
 			}
 		}
 	}
@@ -382,6 +382,18 @@ public class Scheduler extends Thread {
 		}
 		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
 		handler.killAllTimers();
+	}
+	
+	/**
+	 * Resets all {@link SPOTTimer}s for a given {@link StateMachine}.
+	 * @param stateMachineId
+	 */
+	public synchronized void resetAllTimers(String stateMachineId) {
+		if (SunSpotApplication.output) {
+			System.out.println("Resetting timers for "+stateMachineId);
+		}
+		TimerHandler handler = (TimerHandler)timerHandlers.get(stateMachineId);
+		handler.resetAllTimers();
 	}
 
 	public synchronized Enumeration getIDs() {

@@ -140,6 +140,16 @@ public class TimerHandler {
 		timeoutEventQueue = new Queue();
 	}
 	
+	/**
+	 * Reset all running timers for the corresponding {@link StateMachine}.
+	 */
+	public synchronized void resetAllTimers() {
+		Enumeration keys = activeTimers.keys();
+		while (keys.hasMoreElements()) {
+			resetTimer((String)keys.nextElement());
+		}
+	}
+	
 	public synchronized void stopTimer(String timerId) {
 		((SPOTTimer)activeTimers.get(timerId)).stop();
 		((Thread)activeTimerThreads.get(timerId)).interrupt();

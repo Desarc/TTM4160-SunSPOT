@@ -80,7 +80,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
-					timerHandler.resetTimer(giveUpTimerId);
+					//timerHandler.resetTimer(giveUpTimerId);
 					state = busy;
 					returnControlToScheduler(false);
 				}
@@ -93,6 +93,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
+					//timerHandler.stopTimer(giveUpTimerId);
 					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
@@ -106,6 +107,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
+					//timerHandler.stopTimer(giveUpTimerId);
 					blinkLEDs();
 					state = free;
 					returnControlToScheduler(true);
@@ -119,6 +121,7 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+senderId);
 						System.out.println("------------------------------------------");
 					}
+					//timerHandler.stopTimer(giveUpTimerId);
 					sendDisconnect();
 					blinkLEDs();
 					state = free;
@@ -133,8 +136,8 @@ public class ReceiveStateMachine extends StateMachine {
 						System.out.println("This SPOT: "+app.MAC+", sending SPOT: "+currentEvent.getStateMachineId());
 						System.out.println("------------------------------------------");
 					}
+					//timerHandler.resetTimer(giveUpTimerId);
 					displayReadings();
-					timerHandler.resetTimer(giveUpTimerId);
 					state = busy;
 					returnControlToScheduler(false);
 				}

@@ -167,8 +167,28 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 			scheduler.addExternalEvent(event);
 		}
 		else if (message.getContent().equals(Message.ICanDisplayReadings)) {
-				scheduler.killAllTimers(event.getStateMachineId());
-				scheduler.addExternalEvent(event);
+			scheduler.killAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
+		}
+		else if (message.getContent().equals(Message.Approved)) {
+			scheduler.resetAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
+		}
+		else if (message.getContent().equals(Message.Denied)) {
+			scheduler.killAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
+		}
+		else if (message.getContent().indexOf(Message.Reading) != -1) {
+			scheduler.resetAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
+		}
+		else if (message.getContent().equals(Message.SenderDisconnect)) {
+			scheduler.killAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
+		}
+		else if (message.getContent().equals(Message.ReceiverDisconnect)) {
+			scheduler.killAllTimers(event.getStateMachineId());
+			scheduler.addExternalEvent(event);
 		}
 		else {
 			scheduler.addExternalEvent(event);

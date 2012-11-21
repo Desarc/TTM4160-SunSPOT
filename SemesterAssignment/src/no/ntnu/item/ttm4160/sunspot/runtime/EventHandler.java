@@ -88,6 +88,7 @@ public class EventHandler implements ICommunicationLayerListener, ISwitchListene
 	}
 
 	/**
+	 * Stops all running timers.
 	 * Creates a disconnect {@link Event} for each active {@link StateMachine}.
 	 */
 	private void disconnectAll() {

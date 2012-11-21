@@ -141,6 +141,10 @@ public class TimerHandler {
 		}
 	}
 	
+	/**
+	 * Stops a given timer.
+	 * @param timerId
+	 */
 	public synchronized void stopTimer(String timerId) {
 		((SPOTTimer)activeTimers.get(timerId)).stop();
 		((Thread)activeTimerThreads.get(timerId)).interrupt();

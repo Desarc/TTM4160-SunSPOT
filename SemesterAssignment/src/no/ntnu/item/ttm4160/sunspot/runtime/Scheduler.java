@@ -45,6 +45,10 @@ public class Scheduler extends Thread {
 		previousStateMachineId = "";
 	}
 	
+	/**
+	 * Sleeps when waiting for events, or when a state machine is executing.
+	 * When interrupted, selects the next event to be processed.
+	 */
 	public void run() {
 		while (true) {
 			try {

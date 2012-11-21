@@ -50,6 +50,10 @@ public abstract class StateMachine extends Thread {
 		this.priority = priority;
 	}
 	
+	/**
+	 * Creates a {@link Thread} instance for the state machine, and starts thread execution.
+	 * @return
+	 */
 	public Thread startThread() {
 		Thread stateMachineThread = new Thread(this);
 		stateMachineThread.start();
